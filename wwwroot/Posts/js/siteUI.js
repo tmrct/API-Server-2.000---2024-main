@@ -213,6 +213,7 @@ function renderPost(post, loggedUser) {
         `
         <span class="editCmd cmdIconSmall fa fa-pencil" postId="${post.Id}" title="Modifier nouvelle"></span>
         <span class="deleteCmd cmdIconSmall fa fa-trash" postId="${post.Id}" title="Effacer nouvelle"></span>
+        <span class="likeCmd cmdIconSmall fa fa-thumbs-up" postId="${post.Id}" title="Aimer la nouvelle"></span>
         `;
 
     return $(`
@@ -256,9 +257,9 @@ function updateDropDownMenu() {
     DDMenu.empty();
     DDMenu.append($(`
         <div class="dropdown-item" id="loginCmd">
-                        <i class="menuIcon fa fa-sign-in mx-2"></i> Connexion
-                    </div>
-                    <div class="dropdown-divider"></div>
+            <i class="menuIcon fa fa-sign-in mx-2"></i> Connexion
+        </div>
+        <div class="dropdown-divider"></div>
         `));
     DDMenu.append($(`
         <div class="dropdown-item menuItemLayout" id="allCatCmd">
