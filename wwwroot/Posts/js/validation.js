@@ -132,4 +132,3 @@ function addConflictValidation(serviceUrl, fieldName, submitBtnId) {
     $("#" + submitBtnId).on("click", () => { ConflictTestRequest(serviceUrl, fieldName) });
     $("#" + submitBtnId).parents('form:first').on("submit", function (e) { return !Conflict(); });
 }
-

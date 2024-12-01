@@ -163,8 +163,6 @@ function showAbout() {
 
 //////////////////////////// Posts rendering /////////////////////////////////////////////////////////////
 
-//////////////////////////// Posts rendering /////////////////////////////////////////////////////////////
-
 function start_Periodic_Refresh() {
     setInterval(async () => {
         if (!periodic_Refresh_paused) {
@@ -532,4 +530,118 @@ function getFormData($form) {
         jsonObject[control.name] = control.value.replace(removeTag, "");
     });
     return jsonObject;
+}
+
+
+//////////////////////// Account rendering /////////////////////////////////////////////////////////////////
+function showCreateAccountForm() {
+    showForm();
+    $("#viewTitle").text("Création de compte");
+    renderAccountForm();
+}
+
+function renderAccountForm(account = null){
+    let create = account == null;
+    if (create) account = newAccount();
+    $("#form").show();
+    $("#form").empty();
+    $("#form").append(`
+        <form class="form" id="postForm">
+            <input type="hidden" name="Id" value="${account.Id}"/>
+             <input type="hidden" name="Date" value="${account.Date}"/>
+            <label for="Email" class="form-label">Adresse de courriel </label>
+            <input 
+                class="form-control"
+                name="Email"
+                id="Email"
+                placeholder="Courriel"
+                required
+                value="${post.Email}"
+            />
+            <input 
+                class="form-control"
+                name="EVerification"
+                id="EVerification"
+                placeholder="Vérification"
+                required
+            />
+            <label for="Password" class="form-label"> Mot de passe </label>
+            <input 
+                class="form-control"
+                name="Password" 
+                id="Password" 
+                placeholder="Mot de passe"
+                required
+                RequireMessage="Veuillez entrez un mot de passe"
+                InvalidMessage="Le mot de passe est invalide"
+                value="${post.Password}"
+            />
+            <input 
+                class="form-control"
+                name="EPassword" 
+                id="EPassword" 
+                placeholder="Vérification"
+                required
+                RequireMessage="Vérification requise"
+                InvalidMessage="Les mots de passes ne sont pas égaux"
+            />
+            
+            <label for="Name" class="form-label">Nom</label>
+             <input class="form-control" 
+                          name="Name" 
+                          id="Name"
+                          placeholder="Nom" 
+                          required 
+                          RequireMessage = 'Veuillez entrer un nom'
+
+            <label class="form-label">Avatar </label>
+            <div class='imageUploaderContainer'>
+                <div class='imageUploader' 
+                     newImage='${create}' 
+                     controlId='Image' 
+                     imageSrc='${account.Image}' 
+                     waitingImage="Loading_icon.gif">
+                </div>
+            </div>
+            <input type="submit" value="Enregistrer" id="createAccount" class="btn btn-primary displayNone">
+        </form>
+    `);
+    initImageUploaders();
+    initFormValidation();
+
+    addConflictValidation('/api/checkEmailConflict', 'Email', 'createAccount');
+
+    $("#commit").click(function () {
+        $("#commit").off();
+        return $('#createAccount').trigger("click");
+    });
+    $('#accountForm').on("submit", async function (event) {
+        event.preventDefault();
+        let account = getFormData($("#accountForm"));
+        if (create)
+            account.Created = Local_to_UTC(Date.now());
+        post = await Accounts_API.Save(account, create);
+        if (!Posts_API.error) {
+            await showPosts();
+            postsPanel.scrollToElem(post.Id);
+        }
+        else
+            showError("Une erreur est survenue! ", Accounts_API.currentHttpError);
+    });
+    $('#cancel').on("click", async function () {
+        await showPosts();
+    });
+}
+
+function newAccount() {
+    let Account = {};
+    Account.Id = 0;
+    Account.Name = "";
+    Account.Email = "";
+    Account.Password = "";
+    Account.Avatar = "no-avatar.png";
+    Account.Created =0;
+    Account.VerifyCode = "";
+    Account.Authorizations={"readAccess":1,"writeAccess":1}
+    return Account;
 }
