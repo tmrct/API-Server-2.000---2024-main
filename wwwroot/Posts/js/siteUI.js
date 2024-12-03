@@ -22,7 +22,9 @@ Init_UI();
 async function Init_UI() {
     postsPanel = new PageManager('postsScrollPanel', 'postsPanel', 'postSample', renderPosts);
     $('#createPost').on("click", async function () {
-        showCreatePostForm();
+        // showCreatePostForm();
+        //remettre createpostform() quand j'ai terminé les pages d'inscription
+        showCreateAccountForm();
     });
     $('#abort').on("click", async function () {
         showPosts();
@@ -568,6 +570,7 @@ function showCreateAccountForm() {
 function renderAccountForm(account = null){
     let create = account == null;
     if (create) account = newAccount();
+    console.log(account.Id);
     $("#form").show();
     $("#form").empty();
     $("#form").append(`
@@ -581,7 +584,7 @@ function renderAccountForm(account = null){
                 id="Email"
                 placeholder="Courriel"
                 required
-                value="${post.Email}"
+                value="${account.Email}"
             />
             <input 
                 class="form-control"
@@ -594,23 +597,24 @@ function renderAccountForm(account = null){
             <input 
                 class="form-control"
                 name="Password" 
-                id="Password" 
+                id="Password"
+                type="Password"
                 placeholder="Mot de passe"
                 required
                 RequireMessage="Veuillez entrez un mot de passe"
                 InvalidMessage="Le mot de passe est invalide"
-                value="${post.Password}"
+                value="${account.Password}"
             />
             <input 
                 class="form-control"
                 name="EPassword" 
-                id="EPassword" 
+                id="EPassword"
+                type="Password"
                 placeholder="Vérification"
                 required
                 RequireMessage="Vérification requise"
                 InvalidMessage="Les mots de passes ne sont pas égaux"
             />
-            
             <label for="Name" class="form-label">Nom</label>
              <input class="form-control" 
                           name="Name" 
@@ -618,13 +622,13 @@ function renderAccountForm(account = null){
                           placeholder="Nom" 
                           required 
                           RequireMessage = 'Veuillez entrer un nom'
-
+            </>
             <label class="form-label">Avatar </label>
             <div class='imageUploaderContainer'>
                 <div class='imageUploader' 
                      newImage='${create}' 
                      controlId='Image' 
-                     imageSrc='${account.Image}' 
+                     imageSrc='${account.Avatar}' 
                      waitingImage="Loading_icon.gif">
                 </div>
             </div>
@@ -634,7 +638,7 @@ function renderAccountForm(account = null){
     initImageUploaders();
     initFormValidation();
 
-    addConflictValidation('/api/checkEmailConflict', 'Email', 'createAccount');
+    addConflictValidation('/api/checkEmailConflict', 'Email', 'createAccount'); //je dois faire le checkEmailConflict moi même.
 
     $("#commit").click(function () {
         $("#commit").off();
