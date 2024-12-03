@@ -2,7 +2,7 @@
 ////// 2024
 //////////////////////////////
 
-const periodicRefreshPeriod = 10;
+const periodicRefreshPeriod = 2;
 const waitingGifTrigger = 2000;
 const minKeywordLenth = 3;
 const keywordsOnchangeDelay = 500;
@@ -10,6 +10,7 @@ const keywordsOnchangeDelay = 500;
 let categories = [];
 let selectedCategory = "";
 let currentETag = "";
+let currentPostsCount = -1;
 let periodic_Refresh_paused = false;
 let postsPanel;
 let itemLayout;
@@ -21,7 +22,9 @@ Init_UI();
 async function Init_UI() {
     postsPanel = new PageManager('postsScrollPanel', 'postsPanel', 'postSample', renderPosts);
     $('#createPost').on("click", async function () {
-        showCreatePostForm();
+        // showCreatePostForm();
+        //remettre createpostform() quand j'ai terminé les pages d'inscription
+        showCreateAccountForm();
     });
     $('#abort').on("click", async function () {
         showPosts();
@@ -42,6 +45,7 @@ async function Init_UI() {
 /////////////////////////// Search keywords UI //////////////////////////////////////////////////////////
 
 function installKeywordsOnkeyupEvent() {
+
     $("#searchKeys").on('keyup', function () {
         clearTimeout(keywordsOnchangeTimger);
         keywordsOnchangeTimger = setTimeout(() => {
@@ -166,12 +170,26 @@ function showAbout() {
 //////////////////////////// Posts rendering /////////////////////////////////////////////////////////////
 
 function start_Periodic_Refresh() {
+    $("#reloadPosts").addClass('white');
+    $("#reloadPosts").on('click', async function () {
+        $("#reloadPosts").addClass('white');
+        postsPanel.resetScrollPosition();
+        await showPosts();
+    })
     setInterval(async () => {
         if (!periodic_Refresh_paused) {
             let etag = await Posts_API.HEAD();
-            if (currentETag != etag) {
+            // the etag contain the number of model records in the following form
+            // xxx-etag
+            let postsCount = parseInt(etag.split("-")[0]);
+            if (currentETag != etag) {           
+                if (postsCount != currentPostsCount) {
+                    console.log("postsCount", postsCount)
+                    currentPostsCount = postsCount;
+                    $("#reloadPosts").removeClass('white');
+                } else
+                    await showPosts();
                 currentETag = etag;
-                await showPosts();
             }
         }
     },
@@ -191,10 +209,11 @@ async function renderPosts(queryString) {
     let response = await Posts_API.Get(queryString);
     if (!Posts_API.error) {
         currentETag = response.ETag;
+        currentPostsCount = parseInt(currentETag.split("-")[0]);
         let Posts = response.data;
         if (Posts.length > 0) {
             Posts.forEach(Post => {
-                postsPanel.itemsPanel.append(renderPost(Post));
+                postsPanel.append(renderPost(Post));
             });
         } else
             endOfData = true;
@@ -319,6 +338,7 @@ function attach_Posts_UI_Events_Callback() {
         $(`.commentsPanel[postId=${$(this).attr("postId")}]`).hide();
         $(`.moreText[postId=${$(this).attr("postId")}]`).show();
         $(this).hide();
+        postsPanel.scrollToElem($(this).attr("postId"));
         $(`.postTextContainer[postId=${$(this).attr("postId")}]`).addClass('hideExtra');
         $(`.postTextContainer[postId=${$(this).attr("postId")}]`).removeClass('showExtra');
     })
@@ -538,4 +558,119 @@ function getFormData($form) {
         jsonObject[control.name] = control.value.replace(removeTag, "");
     });
     return jsonObject;
+}
+
+//////////////////////// Account rendering /////////////////////////////////////////////////////////////////
+function showCreateAccountForm() {
+    showForm();
+    $("#viewTitle").text("Création de compte");
+    renderAccountForm();
+}
+
+function renderAccountForm(account = null){
+    let create = account == null;
+    if (create) account = newAccount();
+    console.log(account.Id);
+    $("#form").show();
+    $("#form").empty();
+    $("#form").append(`
+        <form class="form" id="postForm">
+            <input type="hidden" name="Id" value="${account.Id}"/>
+             <input type="hidden" name="Date" value="${account.Date}"/>
+            <label for="Email" class="form-label">Adresse de courriel </label>
+            <input 
+                class="form-control"
+                name="Email"
+                id="Email"
+                placeholder="Courriel"
+                required
+                value="${account.Email}"
+            />
+            <input 
+                class="form-control"
+                name="EVerification"
+                id="EVerification"
+                placeholder="Vérification"
+                required
+            />
+            <label for="Password" class="form-label"> Mot de passe </label>
+            <input 
+                class="form-control"
+                name="Password" 
+                id="Password"
+                type="Password"
+                placeholder="Mot de passe"
+                required
+                RequireMessage="Veuillez entrez un mot de passe"
+                InvalidMessage="Le mot de passe est invalide"
+                value="${account.Password}"
+            />
+            <input 
+                class="form-control"
+                name="EPassword" 
+                id="EPassword"
+                type="Password"
+                placeholder="Vérification"
+                required
+                RequireMessage="Vérification requise"
+                InvalidMessage="Les mots de passes ne sont pas égaux"
+            />
+            <label for="Name" class="form-label">Nom</label>
+             <input class="form-control" 
+                          name="Name" 
+                          id="Name"
+                          placeholder="Nom" 
+                          required 
+                          RequireMessage = 'Veuillez entrer un nom'
+            </>
+            <label class="form-label">Avatar </label>
+            <div class='imageUploaderContainer'>
+                <div class='imageUploader' 
+                     newImage='${create}' 
+                     controlId='Image' 
+                     imageSrc='${account.Avatar}' 
+                     waitingImage="Loading_icon.gif">
+                </div>
+            </div>
+            <input type="submit" value="Enregistrer" id="createAccount" class="btn btn-primary displayNone">
+        </form>
+    `);
+    initImageUploaders();
+    initFormValidation();
+
+    addConflictValidation('/api/checkEmailConflict', 'Email', 'createAccount'); //je dois faire le checkEmailConflict moi même.
+
+    $("#commit").click(function () {
+        $("#commit").off();
+        return $('#createAccount').trigger("click");
+    });
+    $('#accountForm').on("submit", async function (event) {
+        event.preventDefault();
+        let account = getFormData($("#accountForm"));
+        if (create)
+            account.Created = Local_to_UTC(Date.now());
+        post = await Accounts_API.Save(account, create);
+        if (!Posts_API.error) {
+            await showPosts();
+            postsPanel.scrollToElem(post.Id);
+        }
+        else
+            showError("Une erreur est survenue! ", Accounts_API.currentHttpError);
+    });
+    $('#cancel').on("click", async function () {
+        await showPosts();
+    });
+}
+
+function newAccount() {
+    let Account = {};
+    Account.Id = 0;
+    Account.Name = "";
+    Account.Email = "";
+    Account.Password = "";
+    Account.Avatar = "no-avatar.png";
+    Account.Created =0;
+    Account.VerifyCode = "";
+    Account.Authorizations={"readAccess":1,"writeAccess":1}
+    return Account;
 }
