@@ -140,7 +140,6 @@
     justify-content: flex-end;
     gap: 8px;
 }
-
 .cmdIcon {
     font-size: 1.5rem;
     -webkit-text-stroke-color: white;
@@ -149,7 +148,6 @@
     margin: 8px;
     cursor: pointer;
 }
-
 .menuIcon {
     -webkit-text-fill-color: rgb(0, 87, 204);
 }
