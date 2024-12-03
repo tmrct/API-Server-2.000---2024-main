@@ -638,7 +638,7 @@ function renderAccountForm(account = null){
     initImageUploaders();
     initFormValidation();
 
-    addConflictValidation('/api/checkEmailConflict', 'Email', 'createAccount'); //je dois faire le checkEmailConflict moi même.
+    addConflictValidation('./api/conflict', 'Email', 'createAccount'); //je dois faire le checkEmailConflict moi même.
 
     $("#commit").click(function () {
         $("#commit").off();
