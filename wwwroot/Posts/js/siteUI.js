@@ -234,13 +234,29 @@ async function renderPosts(queryString) {
 }
 function renderPost(post, loggedUser = null) {
     let date = convertToFrenchDate(UTC_To_Local(post.Date));
-    let crudIcon = loggedUser && loggedUser.isAdmin // Replace "Admin" with the actual role/condition
-    ? `
-    <span class="editCmd cmdIconSmall fa fa-pencil" postId="${post.Id}" title="Modifier nouvelle"></span>
-    <span class="deleteCmd cmdIconSmall fa fa-trash" postId="${post.Id}" title="Effacer nouvelle"></span>
-    <span class="likeCmd cmdIconSmall fa fa-thumbs-up" postId="${post.Id}" title="Aimer la nouvelle"></span>
-    `
-    : ''; // No icons for unauthorized users
+    let crudIcon = '';
+
+    if (loggedUser) {
+        if (loggedUser.isSuper) {
+            // Super user can edit, delete, and like
+            crudIcon = `
+                <span class="editCmd cmdIconSmall fa fa-pencil" postId="${post.Id}" title="Modifier nouvelle"></span>
+                <span class="deleteCmd cmdIconSmall fa fa-trash" postId="${post.Id}" title="Effacer nouvelle"></span>
+                <span class="likeCmd cmdIconSmall fa fa-thumbs-up" postId="${post.Id}" title="Aimer la nouvelle"></span>
+            `;
+        } else if (loggedUser.isAdmin) {
+            // Admin can only delete
+            crudIcon = `
+                <span></span>
+                <span></span>
+                <span></span>
+                <span class="deleteCmd cmdIconSmall fa fa-trash" postId="${post.Id}" title="Effacer nouvelle"></span>
+            `;
+        }
+    } else {
+        // No icons for unauthorized users
+        crudIcon = ''; 
+    }
     return $(`
         <div class="post" id="${post.Id}">
             <div class="postHeader">
@@ -300,6 +316,15 @@ function updateDropDownMenu() {
             </div>
             <div class="dropdown-divider"></div>
         `));
+        if (loggedUser.isAdmin) {
+            DDMenu.append($(`
+                <div class="dropdown-item" id="manageUsersCmd">
+                    <i class="menuIcon fa fa-users mx-2"></i> Gestion des usagers
+                </div>
+                <div class="dropdown-divider"></div>
+            `));
+        }
+        
     } else {
         // User is not logged in
         DDMenu.append($(`
@@ -350,10 +375,9 @@ function updateDropDownMenu() {
     });
 
     if (loggedUser) {
-        $('#logoutCmd').on("click", function() {
-            sessionStorage.removeItem('user');
-            sessionStorage.removeItem('access_token');
-            location.reload(); // Reload the page to update the menu
+        $('#logoutCmd').on("click", async function() {
+            await Accounts_API.logout();
+            location.reload();
         });
 
         $('#profileCmd').on("click", function() {

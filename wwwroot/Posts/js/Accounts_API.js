@@ -44,19 +44,31 @@ class Accounts_API {
             });
         });
     }
-    static async getConnectedUser() {
-        this.initHttpState();
+    static async logout() {
+        this.initHttpState(); // Initialize error state tracking if needed
         return new Promise(resolve => {
-            $.ajax({
-                url: this.Host_URL() + "/getConnectedUser",
-                type: 'GET',
-                contentType: 'application/json',
-                headers: {
-                    'Authorization': 'Bearer ' + sessionStorage.getItem('user')
-                },
-                success: data => { resolve(data); },
-                error: (xhr) => { this.setHttpErrorState(xhr); resolve(null); }
-            });
+            const userJson = sessionStorage.getItem("user");
+            const user = userJson ? JSON.parse(userJson) : null;
+            if (user && user.Id) {
+                $.ajax({
+                    method: 'GET',
+                    contentType: 'application/json',
+                    url: `${this.Host_URL()}/accounts/logout/${user.Id}`, // Include userId in the URL
+                    data: { userId: user.Id }, // Correctly format the data
+                    complete: data => {
+                        sessionStorage.removeItem("access_token");
+                        sessionStorage.removeItem("user");
+                        resolve({ data });
+                    },
+                    error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
+                });
+            } else {
+                // Handle case where user is not found in sessionStorage
+                sessionStorage.removeItem("access_token");
+                sessionStorage.removeItem("user");
+                resolve(null);
+            }
         });
     }
+
 }
