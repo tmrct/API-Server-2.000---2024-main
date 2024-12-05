@@ -578,16 +578,16 @@ function renderAccountForm(account = null){
              <input type="hidden" name="Date" value="${account.Date}"/>
             <label for="Email" class="form-label">Adresse de courriel </label>
             <input 
-                class="form-control"
+                class="form-control Email MatchedInput "
                 name="Email"
                 id="Email"
                 placeholder="Courriel"
                 required
                 value="${account.Email}"
-                customErrorMessage= "Ce courriel est déjà utilisé."
+                customErrorMessage= "Ce courriel est déjà utilisé"
             />
             <input 
-                class="form-control"
+                class="form-control Email MatchedInput "
                 name="EVerification"
                 id="EVerification"
                 placeholder="Vérification"
@@ -638,7 +638,7 @@ function renderAccountForm(account = null){
     initImageUploaders();
     initFormValidation();
 
-    addConflictValidation('http://localhost:5000/accounts/conflict', 'Email', 'createAccount');
+    addConflictValidation('http://localhost:5000/accounts/conflict', 'Email', 'createAccount'); //Correct the url when published..
 
     $("#commit").click(function () {
         $("#commit").off();
