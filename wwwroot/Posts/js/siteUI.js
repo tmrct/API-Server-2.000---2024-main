@@ -570,7 +570,6 @@ function showCreateAccountForm() {
 function renderAccountForm(account = null){
     let create = account == null;
     if (create) account = newAccount();
-    console.log(account.Id);
     $("#form").show();
     $("#form").empty();
     $("#form").append(`
@@ -638,7 +637,7 @@ function renderAccountForm(account = null){
     initImageUploaders();
     initFormValidation();
 
-    addConflictValidation('./api/conflict', 'Email', 'createAccount'); //je dois faire le checkEmailConflict moi même.
+    addConflictValidation('http://localhost:5000/accounts/conflict', 'Email', 'createAccount');
 
     $("#commit").click(function () {
         $("#commit").off();
