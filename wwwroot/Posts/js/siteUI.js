@@ -659,8 +659,6 @@ function renderAccountForm(account = null){
             />
             <input 
                 class="form-control MatchedInput "
-                name="EVerification"
-                id="EVerification"
                 matchedInputId="Email"
                 placeholder="Vérification"
                 required
@@ -681,8 +679,6 @@ function renderAccountForm(account = null){
             />
             <input 
                 class="form-control MatchedInput"
-                name="EPassword" 
-                id="EPassword"
                 type="password"
                 matchedInputId="Password"
                 placeholder="Vérification"
@@ -724,7 +720,7 @@ function renderAccountForm(account = null){
         let account = getFormData($("#accountForm"));
         if (create)
             account.Created = Local_to_UTC(Date.now());
-        console.log(account)
+        console.log(account);
         account = await Accounts_API.Save(account, create);
         if (!Accounts_API.error) {
             await showPosts();

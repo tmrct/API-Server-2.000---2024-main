@@ -54,15 +54,14 @@ class Accounts_API {
     static async Save(data, create = true) {
         Accounts_API.initHttpState();
         return new Promise(resolve => {
-            console.log(data)
-            // $.ajax({
-            //     url: create ? this.API_URL() : this.API_URL() + "/" + data.Id,
-            //     type: create ? "POST" : "PUT",
-            //     contentType: 'application/json',
-            //     data: JSON.stringify(data),
-            //     success: (data) => { resolve(data); },
-            //     error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
-            // });
+            $.ajax({
+                url: create ? this.API_URL() : this.API_URL() + "/register/" + data.Id,
+                type: create ? "POST" : "PUT",
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: (data) => { resolve(data); },
+                error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
+            });
         });
     }
 
