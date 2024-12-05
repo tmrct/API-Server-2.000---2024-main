@@ -28,19 +28,23 @@ class Accounts_API {
             });
         });
     }
-    createAccount(username, password) {
-        // Logic to create a new account
-        console.log(`Account created for user: ${username}`);
+    static async Login(loginInfo) {
+        this.initHttpState(); // Initialize error state tracking if needed
+        return new Promise(resolve => {
+            $.ajax({
+                method: 'POST',
+                contentType: 'application/json',
+                url: this.Host_URL() + "/token",
+                data: JSON.stringify(loginInfo),
+                complete: data => { resolve({data}); },
+                error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
+            });
+        });
     }
-
-    authenticateAccount(username, password) {
-        // Logic to authenticate an account
-        console.log(`Authenticating user: ${username}`);
-        return true; // Placeholder for actual authentication logic
-    }
-
-    deleteAccount(username) {
-        // Logic to delete an account
-        console.log(`Account deleted for user: ${username}`);
+    static async GetLoggedInUser() {
+        this.initHttpState();
+        return new Promise(resolve=>{
+            
+        })
     }
 }
