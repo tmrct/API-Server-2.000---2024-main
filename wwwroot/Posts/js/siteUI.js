@@ -664,8 +664,8 @@ function renderAccountForm(account = null){
                 matchedInputId="Email"
                 placeholder="Vérification"
                 required
-                CustomErrorMessage= "Vérification échouée"
-
+                CustomErrorMessage= "Les courriels ne sont pas équivalents"
+                InvalidMessage="Les courriels ne sont pas équivalents"
             />
             <label for="Password" class="form-label"> Mot de passe </label>
             <input 
@@ -684,10 +684,11 @@ function renderAccountForm(account = null){
                 name="EPassword" 
                 id="EPassword"
                 type="password"
+                matchedInputId="Password"
                 placeholder="Vérification"
                 required
                 RequireMessage="Vérification requise"
-                InvalidMessage="Les mots de passes ne sont pas égaux"
+                InvalidMessage="Les mots de passes ne sont pas équivalents"
             />
             <label for="Name" class="form-label">Nom</label>
              <input class="form-control" 
@@ -723,6 +724,7 @@ function renderAccountForm(account = null){
         let account = getFormData($("#accountForm"));
         if (create)
             account.Created = Local_to_UTC(Date.now());
+        console.log(account)
         account = await Accounts_API.Save(account, create);
         if (!Accounts_API.error) {
             await showPosts();
