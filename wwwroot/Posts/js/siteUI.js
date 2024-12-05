@@ -584,6 +584,7 @@ function renderAccountForm(account = null){
                 placeholder="Courriel"
                 required
                 value="${account.Email}"
+                customErrorMessage= "Ce courriel est déjà utilisé."
             />
             <input 
                 class="form-control"
