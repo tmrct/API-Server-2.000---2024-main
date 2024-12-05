@@ -1,7 +1,7 @@
 // Accounts_API.js
 class Accounts_API {
     static Host_URL() { return "http://localhost:5000"; }
-    static API_URL() { return this.Host_URL() + "/api/accounts" };
+    static API_URL() { return this.Host_URL() + "api/accounts" };
 
     static initHttpState() {
         this.currentHttpError = "";
@@ -36,15 +36,28 @@ class Accounts_API {
                 contentType: 'application/json',
                 url: this.Host_URL() + "/token",
                 data: JSON.stringify(loginInfo),
-                complete: data => { resolve({data}); },
+                complete: data => { 
+                    sessionStorage.setItem("access_token", data.responseJSON.Access_token);
+                    sessionStorage.setItem("user", data.responseJSON.User);
+                    resolve({data});            
+            },
                 error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
             });
         });
     }
-    static async GetLoggedInUser() {
+    static async getConnectedUser() {
         this.initHttpState();
-        return new Promise(resolve=>{
-            
-        })
+        return new Promise(resolve => {
+            $.ajax({
+                url: this.Host_URL() + "/getConnectedUser",
+                type: 'GET',
+                contentType: 'application/json',
+                headers: {
+                    'Authorization': 'Bearer ' + sessionStorage.getItem('user')
+                },
+                success: data => { resolve(data); },
+                error: (xhr) => { this.setHttpErrorState(xhr); resolve(null); }
+            });
+        });
     }
 }

@@ -626,6 +626,7 @@ function renderLoginForm() {
         event.preventDefault();
         let loginData = getFormData($("#loginForm"));
         let response = await Accounts_API.Login(loginData);
+        //let lol = await Accounts_API.getConnectedUser();
         if (!Accounts_API.error) {
             await showPosts();
         } else {
