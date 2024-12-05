@@ -164,6 +164,11 @@ function showAbout() {
     $("#viewTitle").text("À propos...");
     $("#aboutContainer").show();
 }
+function getLoggedUser() {
+    const userJson = sessionStorage.getItem('user');
+    return userJson ? JSON.parse(userJson) : null; // Parse JSON string to object
+}
+
 
 //////////////////////////// Posts rendering /////////////////////////////////////////////////////////////
 
@@ -214,7 +219,7 @@ async function renderPosts(queryString) {
         let Posts = response.data;
         if (Posts.length > 0) {
             Posts.forEach(Post => {
-                postsPanel.append(renderPost(Post));
+                postsPanel.append(renderPost(Post, getLoggedUser()));
             });
         } else
             endOfData = true;
@@ -229,13 +234,29 @@ async function renderPosts(queryString) {
 }
 function renderPost(post, loggedUser = null) {
     let date = convertToFrenchDate(UTC_To_Local(post.Date));
-    let crudIcon = loggedUser && loggedUser.Role === "Admin" // Replace "Admin" with the actual role/condition
-    ? `
-    <span class="editCmd cmdIconSmall fa fa-pencil" postId="${post.Id}" title="Modifier nouvelle"></span>
-    <span class="deleteCmd cmdIconSmall fa fa-trash" postId="${post.Id}" title="Effacer nouvelle"></span>
-    <span class="likeCmd cmdIconSmall fa fa-thumbs-up" postId="${post.Id}" title="Aimer la nouvelle"></span>
-    `
-    : ''; // No icons for unauthorized users
+    let crudIcon = '';
+
+    if (loggedUser) {
+        if (loggedUser.isSuper) {
+            // Super user can edit, delete, and like
+            crudIcon = `
+                <span class="editCmd cmdIconSmall fa fa-pencil" postId="${post.Id}" title="Modifier nouvelle"></span>
+                <span class="deleteCmd cmdIconSmall fa fa-trash" postId="${post.Id}" title="Effacer nouvelle"></span>
+                <span class="likeCmd cmdIconSmall fa fa-thumbs-up" postId="${post.Id}" title="Aimer la nouvelle"></span>
+            `;
+        } else if (loggedUser.isAdmin) {
+            // Admin can only delete
+            crudIcon = `
+                <span></span>
+                <span></span>
+                <span></span>
+                <span class="deleteCmd cmdIconSmall fa fa-trash" postId="${post.Id}" title="Effacer nouvelle"></span>
+            `;
+        }
+    } else {
+        // No icons for unauthorized users
+        crudIcon = ''; 
+    }
     return $(`
         <div class="post" id="${post.Id}">
             <div class="postHeader">
@@ -271,21 +292,55 @@ async function compileCategories() {
         }
     }
 }
+
 function updateDropDownMenu() {
+    let loggedUser = getLoggedUser();
     let DDMenu = $("#DDMenu");
     let selectClass = selectedCategory === "" ? "fa-check" : "fa-fw";
     DDMenu.empty();
-    DDMenu.append($(`
-        <div class="dropdown-item" id="loginCmd">
-            <i class="menuIcon fa fa-sign-in mx-2"></i> Connexion
-        </div>
-        <div class="dropdown-divider"></div>
+
+    if (loggedUser) {
+        // User is logged in
+        DDMenu.append($(`
+            <div class="dropdown-item menuItemLayout" id="userCmd">
+            <img src="${loggedUser.Avatar}" alt="Avatar" class="avatar" style="width: 35px; height: 35px; border-radius: 50%;">
+            <span style="font-weight: bold; padding-left: 5px;">${loggedUser.Name}</span>
+            </div>
+            <div class="dropdown-divider"></div>
+           <div class="dropdown-item" id="logoutCmd">
+
+            <i class="menuIcon fa fa-sign-out mx-2"></i> Déconnexion
+            </div>
+            <div class="dropdown-item" id="profileCmd">
+            <i class="menuIcon fa fa-user mx-2"></i> Modifier Profil
+            </div>
+            <div class="dropdown-divider"></div>
         `));
+        if (loggedUser.isAdmin) {
+            DDMenu.append($(`
+                <div class="dropdown-item" id="manageUsersCmd">
+                    <i class="menuIcon fa fa-users mx-2"></i> Gestion des usagers
+                </div>
+                <div class="dropdown-divider"></div>
+            `));
+        }
+        
+    } else {
+        // User is not logged in
+        DDMenu.append($(`
+            <div class="dropdown-item" id="loginCmd">
+                <i class="menuIcon fa fa-sign-in mx-2"></i> Connexion
+            </div>
+            <div class="dropdown-divider"></div>
+        `));
+    }
+
     DDMenu.append($(`
         <div class="dropdown-item menuItemLayout" id="allCatCmd">
             <i class="menuIcon fa ${selectClass} mx-2"></i> Toutes les catégories
         </div>
-        `));
+    `));
+
     categories.forEach(category => {
         selectClass = selectedCategory === category ? "fa-check" : "fa-fw";
         DDMenu.append($(`
@@ -293,29 +348,46 @@ function updateDropDownMenu() {
                 <i class="menuIcon fa ${selectClass} mx-2"></i> ${category}
             </div>
         `));
-    })
-    DDMenu.append($(`<div class="dropdown-divider"></div> `));
+    });
+
+    DDMenu.append($(`<div class="dropdown-divider"></div>`));
     DDMenu.append($(`
         <div class="dropdown-item menuItemLayout" id="aboutCmd">
             <i class="menuIcon fa fa-info-circle mx-2"></i> À propos...
         </div>
-        `));
-    $('#aboutCmd').on("click", function () {
+    `));
+
+    // Event handlers
+    $('#aboutCmd').on("click", function() {
         showAbout();
     });
-    $('#allCatCmd').on("click", async function () {
+
+    $('#allCatCmd').on("click", async function() {
         selectedCategory = "";
         await showPosts(true);
         updateDropDownMenu();
     });
-    $('.category').on("click", async function () {
+
+    $('.category').on("click", async function() {
         selectedCategory = $(this).text().trim();
         await showPosts(true);
         updateDropDownMenu();
     });
-    $('#loginCmd').on("click", function () {
-        showLoginAccountForm();
-    });
+
+    if (loggedUser) {
+        $('#logoutCmd').on("click", async function() {
+            await Accounts_API.logout();
+            location.reload();
+        });
+
+        $('#profileCmd').on("click", function() {
+            showProfileForm();
+        });
+    } else {
+        $('#loginCmd').on("click", function() {
+            showLoginAccountForm();
+        });
+    }
 }
 function attach_Posts_UI_Events_Callback() {
 
@@ -626,6 +698,7 @@ function renderLoginForm() {
         event.preventDefault();
         let loginData = getFormData($("#loginForm"));
         let response = await Accounts_API.Login(loginData);
+        //let lol = await Accounts_API.getConnectedUser();
         if (!Accounts_API.error) {
             await showPosts();
         } else {

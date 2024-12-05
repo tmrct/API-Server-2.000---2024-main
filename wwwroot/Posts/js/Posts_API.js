@@ -26,33 +26,7 @@ class Posts_API {
                 error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
             });
         });
-    }
-    
-    static async GetLoggedInUser() {
-        this.initHttpState(); // Initialize error state tracking if needed
-        try {
-            const response = await fetch(this.Host_URL() + "/api/accounts", {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}` // Send the token from the client
-                }
-            });
-            
-            if (!response.ok) {
-                // Handle HTTP errors based on the status code
-                this.setHttpErrorState(response);
-                return null;
-            }
-    
-            const data = await response.json(); // Assuming the response body contains JSON
-            return data; // Return the user data
-    
-        } catch (error) {
-            this.setHttpErrorState(error);
-            return null;
-        }
-    }
-    
+    }    
     
     static async Get(id = null) {
         Posts_API.initHttpState();
