@@ -38,8 +38,7 @@ class Accounts_API {
                 data: JSON.stringify(loginInfo),
                 complete: data => { 
                     sessionStorage.setItem("access_token", data.responseJSON.Access_token);
-                    sessionStorage.setItem("user", data.responseJSON.User);
-                    resolve({data});            
+                    sessionStorage.setItem("user", JSON.stringify(data.responseJSON.User));                    resolve({data});            
             },
                 error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
             });
