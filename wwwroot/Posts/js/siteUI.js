@@ -645,31 +645,34 @@ function renderAccountForm(account = null){
     $("#form").empty();
     $("#form").append(`
         <form class="form" id="accountForm">
-            <input type="hidden" name="Id" value="${account.Id}"/>
-             <input type="hidden" name="Date" value="${account.Date}"/>
+            <input type="hidden" id="Id" value="${account.Id}"/>
+             <input type="hidden" id="Date" value="${account.Date}"/>
             <label for="Email" class="form-label">Adresse de courriel </label>
             <input 
-                class="form-control Email MatchedInput "
+                class="form-control Email"
                 name="Email"
                 id="Email"
                 placeholder="Courriel"
                 required
                 value="${account.Email}"
-                customErrorMessage= "Ce courriel est déjà utilisé"
+                CustomErrorMessage= "Ce courriel est déjà utilisé"
             />
             <input 
-                class="form-control Email MatchedInput "
+                class="form-control MatchedInput "
                 name="EVerification"
                 id="EVerification"
+                matchedInputId="Email"
                 placeholder="Vérification"
                 required
+                CustomErrorMessage= "Vérification échouée"
+
             />
             <label for="Password" class="form-label"> Mot de passe </label>
             <input 
                 class="form-control"
                 name="Password" 
                 id="Password"
-                type="Password"
+                type="password"
                 placeholder="Mot de passe"
                 required
                 RequireMessage="Veuillez entrez un mot de passe"
@@ -677,10 +680,10 @@ function renderAccountForm(account = null){
                 value="${account.Password}"
             />
             <input 
-                class="form-control"
+                class="form-control MatchedInput"
                 name="EPassword" 
                 id="EPassword"
-                type="Password"
+                type="password"
                 placeholder="Vérification"
                 required
                 RequireMessage="Vérification requise"
@@ -709,7 +712,7 @@ function renderAccountForm(account = null){
     initImageUploaders();
     initFormValidation();
 
-    addConflictValidation('http://localhost:5000/accounts/conflict', 'Email', 'createAccount'); //Correct the url when published..
+    addConflictValidation(Accounts_API.Conflict(), 'Email', 'createAccount');
 
     $("#commit").click(function () {
         $("#commit").off();

@@ -24,7 +24,7 @@ class Accounts_API {
                 type: 'HEAD',
                 contentType: 'text/plain',
                 complete: data => { resolve(data.getResponseHeader('ETag')); },
-                error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
+                error: (xhr) => { Accounts_API.setHttpErrorState(xhr); resolve(null); }
             });
         });
     }
@@ -37,7 +37,7 @@ class Accounts_API {
                 url: this.Host_URL() + "/token",
                 data: JSON.stringify(loginInfo),
                 complete: data => { resolve({data}); },
-                error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
+                error: (xhr) => { Accounts_API.setHttpErrorState(xhr); resolve(null); }
             });
         });
     }
@@ -46,5 +46,8 @@ class Accounts_API {
         return new Promise(resolve=>{
             
         })
+    }
+    static Conflict() {
+        return this.Host_URL()+"/accounts/conflict"
     }
 }
