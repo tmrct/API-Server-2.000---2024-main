@@ -24,6 +24,35 @@ export default class AccountsController extends Controller {
                 this.HttpContext.response.unAuthorized("Unauthorized access");
         }
     }
+    // getUserInfo() {
+    //     const userId = this.HttpContext.path.params.id;
+    //     if (!userId) {
+    //         this.HttpContext.response.badRequest("User ID is missing.");
+    //         return;
+    //     }
+    
+    //     // Check if the user has permissions to view the requested user info
+    //     if (AccessControl.readGranted(this.HttpContext.authorizations, AccessControl.user())) {
+    //         const user = this.repository.get(userId); // Fetch user from the repository
+    //         if (user) {
+    //             // Exclude sensitive data (e.g., Password, VerifyCode)
+    //             const userInfo = {
+    //                 Id: user.Id,
+    //                 Name: user.Name,
+    //                 Email: user.Email,
+    //                 Created: user.Created,
+    //                 Authorizations: user.Authorizations,
+    //                 Avatar : user.Avatar
+    //             };
+    //             this.HttpContext.response.JSON(userInfo);
+    //         } else {
+    //             this.HttpContext.response.notFound("User not found.");
+    //         }
+    //     } else {
+    //         this.HttpContext.response.unAuthorized("Access denied.");
+    //     }
+    // }
+    
     // POST: /token body payload[{"Email": "...", "Password": "..."}]
     login(loginInfo) {
         if (loginInfo) {

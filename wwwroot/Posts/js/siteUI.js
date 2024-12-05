@@ -22,9 +22,9 @@ Init_UI();
 async function Init_UI() {
     postsPanel = new PageManager('postsScrollPanel', 'postsPanel', 'postSample', renderPosts);
     $('#createPost').on("click", async function () {
-        // showCreatePostForm();
+        showCreatePostForm();
         //remettre createpostform() quand j'ai terminé les pages d'inscription
-        showCreateAccountForm();
+        //showCreateAccountForm();
     });
     $('#abort').on("click", async function () {
         showPosts();
@@ -207,6 +207,7 @@ async function renderPosts(queryString) {
     }
     addWaitingGif();
     let response = await Posts_API.Get(queryString);
+    //let user = await Posts_API.GetLoggedInUser();
     if (!Posts_API.error) {
         currentETag = response.ETag;
         currentPostsCount = parseInt(currentETag.split("-")[0]);
@@ -226,15 +227,15 @@ async function renderPosts(queryString) {
     removeWaitingGif();
     return endOfData;
 }
-function renderPost(post, loggedUser) {
+function renderPost(post, loggedUser = null) {
     let date = convertToFrenchDate(UTC_To_Local(post.Date));
-    let crudIcon =
-        `
-        <span class="editCmd cmdIconSmall fa fa-pencil" postId="${post.Id}" title="Modifier nouvelle"></span>
-        <span class="deleteCmd cmdIconSmall fa fa-trash" postId="${post.Id}" title="Effacer nouvelle"></span>
-        <span class="likeCmd cmdIconSmall fa fa-thumbs-up" postId="${post.Id}" title="Aimer la nouvelle"></span>
-        `;
-
+    let crudIcon = loggedUser && loggedUser.Role === "Admin" // Replace "Admin" with the actual role/condition
+    ? `
+    <span class="editCmd cmdIconSmall fa fa-pencil" postId="${post.Id}" title="Modifier nouvelle"></span>
+    <span class="deleteCmd cmdIconSmall fa fa-trash" postId="${post.Id}" title="Effacer nouvelle"></span>
+    <span class="likeCmd cmdIconSmall fa fa-thumbs-up" postId="${post.Id}" title="Aimer la nouvelle"></span>
+    `
+    : ''; // No icons for unauthorized users
     return $(`
         <div class="post" id="${post.Id}">
             <div class="postHeader">
@@ -311,6 +312,9 @@ function updateDropDownMenu() {
         selectedCategory = $(this).text().trim();
         await showPosts(true);
         updateDropDownMenu();
+    });
+    $('#loginCmd').on("click", function () {
+        showLoginAccountForm();
     });
 }
 function attach_Posts_UI_Events_Callback() {
@@ -464,6 +468,7 @@ function newPost() {
     Post.Text = "";
     Post.Image = "news-logo-upload.png";
     Post.Category = "";
+    Post.AuthorId = 1;
     return Post;
 }
 function renderPostForm(post = null) {
@@ -537,6 +542,7 @@ function renderPostForm(post = null) {
         if (create || !('keepDate' in post))
             post.Date = Local_to_UTC(Date.now());
         delete post.keepDate;
+        post.AuthorId = await Posts_API.GetLoggedInUser();
         post = await Posts_API.Save(post, create);
         if (!Posts_API.error) {
             await showPosts();
@@ -565,6 +571,71 @@ function showCreateAccountForm() {
     showForm();
     $("#viewTitle").text("Création de compte");
     renderAccountForm();
+}
+function showLoginAccountForm() {
+    showForm();
+    $("#viewTitle").text("Connexion");
+    renderLoginForm();
+}
+
+function renderLoginForm() {
+    $("#commit").hide();
+    $("#form").show();
+    $("#form").empty();
+    $("#form").append(`
+        <form class="form" id="loginForm">
+            <label for="Email" class="form-label">Adresse de courriel </label>
+            <input 
+                class="form-control"
+                name="Email"
+                id="Email"
+                placeholder="Courriel"
+                required
+            />
+            <label for="Password" class="form-label">Mot de passe </label>
+            <input 
+                class="form-control"
+                name="Password" 
+                id="Password"
+                type="Password"
+                placeholder="Mot de passe"
+                required
+            />
+            <br>
+            <input type="submit" value="Connexion" id="loginBtn" class="btn btn-primary">
+        </form>
+        <div class = "bottomSection">
+            <hr>
+            <div class="form-group">
+                <button type="button" id="createAccountBtn" class="btn btn-secondary">Créer un compte</button>
+            </div>
+        </div>
+        <script>
+            $('#createAccountBtn').on("click", function () {
+                showCreateAccountForm();
+            });
+        </script>
+    `);
+
+    $("#commit").click(function () {
+        $("#commit").off();
+        return $('#loginAccount').trigger("click");
+    });
+
+    $('#loginForm').on("submit", async function (event) {
+        event.preventDefault();
+        let loginData = getFormData($("#loginForm"));
+        let response = await Accounts_API.Login(loginData);
+        if (!Accounts_API.error) {
+            await showPosts();
+        } else {
+            showError("Une erreur est survenue! ", Accounts_API.currentHttpError);
+        }
+    });
+
+    $('#cancel').on("click", async function () {
+        await showPosts();
+    });
 }
 
 function renderAccountForm(account = null){

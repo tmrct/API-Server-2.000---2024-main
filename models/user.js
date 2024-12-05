@@ -1,18 +1,22 @@
 import Model from './model.js';
 
 export default class User extends Model {
-    constructor()
-    {
+    constructor() {
         super(true);
         this.addField('Name', 'string');
         this.addField('Email', 'email');        
         this.addField('Password', 'string');
         this.addField('Avatar', 'asset');
-        this.addField('Created','integer');
-        this.addField('VerifyCode','string');
-        this.addField('Authorizations','object');
+        this.addField('Created', 'integer');
+        this.addField('VerifyCode', 'string');
+        this.addField('Authorizations', 'object');
 
         this.setKey("Email");
+
+        // Initialize additional properties
+        this.isAdmin = false;
+        this.isBlocked = false;
+        this.isSuper = false;
     }
 
     bindExtraData(instance) {

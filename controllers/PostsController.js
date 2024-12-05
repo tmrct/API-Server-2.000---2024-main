@@ -6,4 +6,7 @@ export default class PostModelsController extends Controller {
     constructor(HttpContext) {
         super(HttpContext, new Repository(new PostModel()));
     }
+    getUserFromContext() {
+        return this.HttpContext.user;
+    }
 }
