@@ -95,7 +95,41 @@ body {
     scrollbar-gutter: stable;
     margin: auto;
 }
-
+.bottomSection{
+    align-items: center;
+    gap: 8px;
+    width: 70%;
+    margin: auto;
+}
+#loginForm{
+    padding: var(--panelPadding);
+    overflow-x: hidden;
+    overflow-y: scroll;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    margin: auto;
+    width: 80%;
+}
+#loginBtn {
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+    background-color: #1b73e8;
+    border-color: transparent !important;
+    color: white;
+}
+#createAccountBtn {
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+    background-color: #0dcaf0;
+    border-color: transparent !important;
+    color: black;
+}
 .scrollPanel {
     height: 100%;
     overflow-x: hidden;
