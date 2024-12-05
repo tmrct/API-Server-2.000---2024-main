@@ -573,7 +573,7 @@ function renderAccountForm(account = null){
     $("#form").show();
     $("#form").empty();
     $("#form").append(`
-        <form class="form" id="postForm">
+        <form class="form" id="accountForm">
             <input type="hidden" name="Id" value="${account.Id}"/>
              <input type="hidden" name="Date" value="${account.Date}"/>
             <label for="Email" class="form-label">Adresse de courriel </label>
@@ -649,10 +649,9 @@ function renderAccountForm(account = null){
         let account = getFormData($("#accountForm"));
         if (create)
             account.Created = Local_to_UTC(Date.now());
-        post = await Accounts_API.Save(account, create);
-        if (!Posts_API.error) {
+        account = await Accounts_API.Save(account, create);
+        if (!Accounts_API.error) {
             await showPosts();
-            postsPanel.scrollToElem(post.Id);
         }
         else
             showError("Une erreur est survenue! ", Accounts_API.currentHttpError);
