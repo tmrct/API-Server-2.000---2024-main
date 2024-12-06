@@ -74,11 +74,11 @@ class Accounts_API {
         return this.Host_URL()+"/accounts/conflict"
     }
 
-    static async Save(data, create = true) {
+    static async Register(data, create = true) {
         Accounts_API.initHttpState();
         return new Promise(resolve => {
             $.ajax({
-                url: create ? this.API_URL() : this.API_URL() + "/register/" + data.Id,
+                url: create ? this.Host_URL() + "/accounts/register" : this.Host_URL() + "/accounts/" + data.Id,
                 type: create ? "POST" : "PUT",
                 contentType: 'application/json',
                 data: JSON.stringify(data),

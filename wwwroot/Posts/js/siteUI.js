@@ -771,7 +771,7 @@ function renderAccountForm(account = null){
             <div class='imageUploaderContainer'>
                 <div class='imageUploader' 
                      newImage='${create}' 
-                     controlId='Image' 
+                     controlId='Avatar' 
                      imageSrc='${account.Avatar}' 
                      waitingImage="Loading_icon.gif">
                 </div>
@@ -794,7 +794,7 @@ function renderAccountForm(account = null){
         if (create)
             account.Created = Local_to_UTC(Date.now());
         console.log(account);
-        account = await Accounts_API.Save(account, create);
+        account = await Accounts_API.Register(account, create);
         if (!Accounts_API.error) {
             await showPosts();
         }
