@@ -1,7 +1,7 @@
 // Accounts_API.js
 class Accounts_API {
     static Host_URL() { return "http://localhost:5000"; }
-    static API_URL() { return this.Host_URL() + "/api/accounts" };
+    static API_URL() { return this.Host_URL() + "api/accounts" };
 
     static initHttpState() {
         this.currentHttpError = "";
@@ -36,16 +36,39 @@ class Accounts_API {
                 contentType: 'application/json',
                 url: this.Host_URL() + "/token",
                 data: JSON.stringify(loginInfo),
-                complete: data => { resolve({data}); },
-                error: (xhr) => { Accounts_API.setHttpErrorState(xhr); resolve(null); }
+                complete: data => { 
+                    sessionStorage.setItem("access_token", data.responseJSON.Access_token);
+                    sessionStorage.setItem("user", JSON.stringify(data.responseJSON.User));                    resolve({data});            
+            },
+                error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
             });
         });
     }
-    static async GetLoggedInUser() {
-        this.initHttpState();
-        return new Promise(resolve=>{
-            
-        })
+    static async logout() {
+        this.initHttpState(); // Initialize error state tracking if needed
+        return new Promise(resolve => {
+            const userJson = sessionStorage.getItem("user");
+            const user = userJson ? JSON.parse(userJson) : null;
+            if (user && user.Id) {
+                $.ajax({
+                    method: 'GET',
+                    contentType: 'application/json',
+                    url: `${this.Host_URL()}/accounts/logout/${user.Id}`, // Include userId in the URL
+                    data: { userId: user.Id }, // Correctly format the data
+                    complete: data => {
+                        sessionStorage.removeItem("access_token");
+                        sessionStorage.removeItem("user");
+                        resolve({ data });
+                    },
+                    error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
+                });
+            } else {
+                // Handle case where user is not found in sessionStorage
+                sessionStorage.removeItem("access_token");
+                sessionStorage.removeItem("user");
+                resolve(null);
+            }
+        });
     }
     static Conflict() {
         return this.Host_URL()+"/accounts/conflict"
