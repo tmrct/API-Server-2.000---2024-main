@@ -81,13 +81,13 @@
     "Id": "f11ee960-aa82-11ef-b942-e7f097a2ee7a"
   },
   {
-    "Id": "5914c420-b3f4-11ef-adaf-d51c1846b248",
+    "Id": "6a458650-b3f7-11ef-8745-2d02144ecf2c",
     "Email": "georges.el.korm@gmail.com",
     "Password": "password",
-    "Name": "korm",
-    "Avatar": "5914eb30-b3f4-11ef-adaf-d51c1846b248.png",
-    "Created": 1733522752,
-    "VerifyCode": 9514,
+    "Name": "korn",
+    "Avatar": "6a458651-b3f7-11ef-8745-2d02144ecf2c.png",
+    "Created": 1733524069,
+    "VerifyCode": 487068,
     "Authorizations": {
       "readAccess": 1,
       "writeAccess": 1

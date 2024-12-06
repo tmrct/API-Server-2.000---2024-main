@@ -1,7 +1,6 @@
 ////// Author: Nicolas Chourot
 ////// 2024
 //////////////////////////////
-
 const periodicRefreshPeriod = 2;
 const waitingGifTrigger = 2000;
 const minKeywordLenth = 3;
