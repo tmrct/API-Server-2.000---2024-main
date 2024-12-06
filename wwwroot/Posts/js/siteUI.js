@@ -714,35 +714,36 @@ function renderLoginForm() {
 function renderAccountForm(account = null){
     let create = account == null;
     if (create) account = newAccount();
-    console.log(account.Id);
     $("#form").show();
     $("#form").empty();
     $("#form").append(`
-        <form class="form" id="postForm">
-            <input type="hidden" name="Id" value="${account.Id}"/>
-             <input type="hidden" name="Date" value="${account.Date}"/>
+        <form class="form" id="accountForm">
+            <input type="hidden" id="Id" value="${account.Id}"/>
+             <input type="hidden" id="Date" value="${account.Date}"/>
             <label for="Email" class="form-label">Adresse de courriel </label>
             <input 
-                class="form-control"
+                class="form-control Email"
                 name="Email"
                 id="Email"
                 placeholder="Courriel"
                 required
                 value="${account.Email}"
+                CustomErrorMessage= "Ce courriel est déjà utilisé"
             />
             <input 
-                class="form-control"
-                name="EVerification"
-                id="EVerification"
+                class="form-control MatchedInput "
+                matchedInputId="Email"
                 placeholder="Vérification"
                 required
+                CustomErrorMessage= "Les courriels ne sont pas équivalents"
+                InvalidMessage="Les courriels ne sont pas équivalents"
             />
             <label for="Password" class="form-label"> Mot de passe </label>
             <input 
                 class="form-control"
                 name="Password" 
                 id="Password"
-                type="Password"
+                type="password"
                 placeholder="Mot de passe"
                 required
                 RequireMessage="Veuillez entrez un mot de passe"
@@ -750,14 +751,13 @@ function renderAccountForm(account = null){
                 value="${account.Password}"
             />
             <input 
-                class="form-control"
-                name="EPassword" 
-                id="EPassword"
-                type="Password"
+                class="form-control MatchedInput"
+                type="password"
+                matchedInputId="Password"
                 placeholder="Vérification"
                 required
                 RequireMessage="Vérification requise"
-                InvalidMessage="Les mots de passes ne sont pas égaux"
+                InvalidMessage="Les mots de passes ne sont pas équivalents"
             />
             <label for="Name" class="form-label">Nom</label>
              <input class="form-control" 
@@ -771,7 +771,7 @@ function renderAccountForm(account = null){
             <div class='imageUploaderContainer'>
                 <div class='imageUploader' 
                      newImage='${create}' 
-                     controlId='Image' 
+                     controlId='Avatar' 
                      imageSrc='${account.Avatar}' 
                      waitingImage="Loading_icon.gif">
                 </div>
@@ -782,7 +782,7 @@ function renderAccountForm(account = null){
     initImageUploaders();
     initFormValidation();
 
-    addConflictValidation('/api/checkEmailConflict', 'Email', 'createAccount'); //je dois faire le checkEmailConflict moi même.
+    addConflictValidation(Accounts_API.Conflict(), 'Email', 'createAccount');
 
     $("#commit").click(function () {
         $("#commit").off();
@@ -793,10 +793,10 @@ function renderAccountForm(account = null){
         let account = getFormData($("#accountForm"));
         if (create)
             account.Created = Local_to_UTC(Date.now());
-        post = await Accounts_API.Save(account, create);
-        if (!Posts_API.error) {
+        console.log(account);
+        account = await Accounts_API.Register(account, create);
+        if (!Accounts_API.error) {
             await showPosts();
-            postsPanel.scrollToElem(post.Id);
         }
         else
             showError("Une erreur est survenue! ", Accounts_API.currentHttpError);

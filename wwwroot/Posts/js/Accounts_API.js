@@ -24,7 +24,7 @@ class Accounts_API {
                 type: 'HEAD',
                 contentType: 'text/plain',
                 complete: data => { resolve(data.getResponseHeader('ETag')); },
-                error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
+                error: (xhr) => { Accounts_API.setHttpErrorState(xhr); resolve(null); }
             });
         });
     }
@@ -68,6 +68,23 @@ class Accounts_API {
                 sessionStorage.removeItem("user");
                 resolve(null);
             }
+        });
+    }
+    static Conflict() {
+        return this.Host_URL()+"/accounts/conflict"
+    }
+
+    static async Register(data, create = true) {
+        Accounts_API.initHttpState();
+        return new Promise(resolve => {
+            $.ajax({
+                url: create ? this.Host_URL() + "/accounts/register" : this.Host_URL() + "/accounts/" + data.Id,
+                type: create ? "POST" : "PUT",
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: (data) => { resolve(data); },
+                error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
+            });
         });
     }
 
