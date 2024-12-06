@@ -80,12 +80,13 @@ function initFormValidation() {
                     event.target.setCustomValidity(CustomErrorMessage);
                 else
                     event.target.setCustomValidity(InvalidMessage);
-            console.log(event.target.name, event.target.validity);
+            // console.log(event.target.name, event.target.validity);
         })
     });
 
     $(".MatchedInput").each(function () {
         let input = $(this);
+        console.log(input);
         let matchedInput = $(`#${input.attr('matchedInputId')}`);
         matchedInput.on("change", function () { input.attr("pattern", matchedInput.val()); })
         matchedInput.on("focus", function () { input.attr("pattern", matchedInput.val()); })
