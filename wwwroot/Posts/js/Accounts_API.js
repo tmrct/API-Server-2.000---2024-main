@@ -105,7 +105,7 @@ class Accounts_API {
                 type: create ? "POST" : "PUT",
                 contentType: 'application/json',
                 data: JSON.stringify(data),
-                success: (data) => { resolve(data); },
+                complete: (data) => { resolve(data); },
                 error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
             });
         });
