@@ -94,16 +94,16 @@
     }
   },
   {
-    "Id": "78b286e0-b3f5-11ef-911f-6d556a288090",
     "Email": "tristanmarcotte@outlook.com",
     "Password": "password",
     "Name": "Tristan Marcotte",
     "Avatar": "78b2adf0-b3f5-11ef-911f-6d556a288090.jpeg",
     "Created": 1733523235,
-    "VerifyCode": 674674,
+    "VerifyCode": "verified",
     "Authorizations": {
       "readAccess": 1,
       "writeAccess": 1
-    }
+    },
+    "Id": "78b286e0-b3f5-11ef-911f-6d556a288090"
   }
 ]

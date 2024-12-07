@@ -70,6 +70,29 @@ class Accounts_API {
             }
         });
     }
+    static async Verify(code) {
+        this.initHttpState(); // Initialize error state tracking if needed
+        return new Promise(resolve => {
+            const userJson = sessionStorage.getItem("user");
+            const user = userJson ? JSON.parse(userJson) : null;
+            const accessToken = sessionStorage.getItem("access_token");
+            if (accessToken && user) {
+                $.ajax({
+                    method: 'GET',
+                    contentType: 'application/json',
+                    url: `${this.Host_URL()}/accounts/verify?id=${user.Id}&code=${code}`,
+                    headers: { 'Authorization': `Bearer ${accessToken}` },
+                    complete: data => {
+                        resolve({ data });
+                    },
+                    error: (xhr) => { Accounts_API.setHttpErrorState(xhr); resolve(null); }
+                });
+            } else {
+                // Handle case where access token or user is not found in sessionStorage
+                resolve(null);
+            }
+        });
+    }
     static Conflict() {
         return this.Host_URL()+"/accounts/conflict"
     }
