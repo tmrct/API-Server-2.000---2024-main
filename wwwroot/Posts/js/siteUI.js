@@ -112,6 +112,18 @@ async function showPosts(reset = false) {
     periodic_Refresh_paused = false;
     await postsPanel.show(reset);
 }
+async function showVerificationForm() {
+    $("#viewTitle").text("Vérification de compte");
+    periodic_Refresh_paused = false;
+
+    renderVerificationForm();
+}
+async function showVerificationFormCreated() {
+    $("#viewTitle").text("Vérification de compte");
+    periodic_Refresh_paused = false;
+
+    renderLoginForm(true);
+}
 function hidePosts() {
     postsPanel.hide();
     hideSearchIcon();
@@ -165,7 +177,10 @@ function showAbout() {
 }
 function getLoggedUser() {
     const userJson = sessionStorage.getItem('user');
-    return userJson ? JSON.parse(userJson) : null; // Parse JSON string to object
+    if (userJson === undefined || userJson === null ) {
+        return null;
+    }
+    return JSON.parse(userJson); // Parse JSON string to object
 }
 
 
@@ -231,10 +246,45 @@ async function renderPosts(queryString) {
     removeWaitingGif();
     return endOfData;
 }
+function renderVerificationForm() {
+    $("#form").show();
+    $("#form").empty();
+    $("#form").append(`
+        <form class="form" id="verificationForm">
+            <label for="VerificationCode" class="form-label">Code de vérification</label>
+            <input 
+                class="form-control"
+                name="VerificationCode"
+                id="VerificationCode"
+                type="number"
+                placeholder="Entrez le code de vérification"
+                required
+            />
+            <br>
+            <input type="submit" value="Vérifier" id="verifyBtn" class="btn btn-primary">
+        </form>
+    `);
+
+    $('#verificationForm').on("submit", async function (event) {
+        event.preventDefault();
+        let verificationData = getFormData($("#verificationForm"));
+        let response = await Accounts_API.Verify(verificationData.VerificationCode);
+        if (!Accounts_API.error) {
+            await showPosts();
+        } else {
+            showError("Une erreur est survenue! ", Accounts_API.currentHttpError);
+        }
+    });
+
+    $('#cancel').on("click", async function () {
+        await showPosts();
+    });
+
+}
+
 function renderPost(post, loggedUser = null) {
     let date = convertToFrenchDate(UTC_To_Local(post.Date));
     let crudIcon = '';
-
     if (loggedUser) {
         if (loggedUser.isSuper) {
             // Super user can edit, delete, and like
@@ -613,7 +663,7 @@ function renderPostForm(post = null) {
         if (create || !('keepDate' in post))
             post.Date = Local_to_UTC(Date.now());
         delete post.keepDate;
-        post.AuthorId = await Posts_API.GetLoggedInUser();
+        //post.AuthorId = await Posts_API.GetLoggedInUser();
         post = await Posts_API.Save(post, create);
         if (!Posts_API.error) {
             await showPosts();
@@ -649,33 +699,37 @@ function showLoginAccountForm() {
     renderLoginForm();
 }
 
-function renderLoginForm() {
+function renderLoginForm(justCreated = false) {
     $("#commit").hide();
     $("#form").show();
     $("#form").empty();
     $("#form").append(`
+            ${justCreated ? '<div class="alert alert-info"><strong>Veuillez prendre vos courriel pour récupérer votre code de vérification</strong></div>' : ''}
         <form class="form" id="loginForm">
             <label for="Email" class="form-label">Adresse de courriel </label>
             <input 
-                class="form-control"
+                class="form-control Email"
                 name="Email"
                 id="Email"
                 placeholder="Courriel"
                 required
+                customErrorMessage="Courriel invalide"
             />
             <label for="Password" class="form-label">Mot de passe </label>
             <input 
                 class="form-control"
                 name="Password" 
                 id="Password"
-                type="Password"
+                type="password"
                 placeholder="Mot de passe"
                 required
+                InvalidMessage="Mot de passe invalide"
+                RequireMessage="Veuillez entrer un mot de passe"
             />
             <br>
             <input type="submit" value="Connexion" id="loginBtn" class="btn btn-primary">
         </form>
-        <div class = "bottomSection">
+        <div class="bottomSection">
             <hr>
             <div class="form-group">
                 <button type="button" id="createAccountBtn" class="btn btn-secondary">Créer un compte</button>
@@ -697,9 +751,13 @@ function renderLoginForm() {
         event.preventDefault();
         let loginData = getFormData($("#loginForm"));
         let response = await Accounts_API.Login(loginData);
-        //let lol = await Accounts_API.getConnectedUser();
         if (!Accounts_API.error) {
-            await showPosts();
+            if(getLoggedUser().VerifyCode == "verified"){
+                await showPosts();
+            }
+            else{
+                await showVerificationForm();
+            }
         } else {
             showError("Une erreur est survenue! ", Accounts_API.currentHttpError);
         }
@@ -795,7 +853,7 @@ function renderAccountForm(account = null){
         console.log(account);
         account = await Accounts_API.Register(account, create);
         if (!Accounts_API.error) {
-            await showPosts();
+            await showVerificationFormCreated();
         }
         else
             showError("Une erreur est survenue! ", Accounts_API.currentHttpError);
