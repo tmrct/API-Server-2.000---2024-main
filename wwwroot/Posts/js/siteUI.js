@@ -22,8 +22,6 @@ async function Init_UI() {
     postsPanel = new PageManager('postsScrollPanel', 'postsPanel', 'postSample', renderPosts);
     $('#createPost').on("click", async function () {
         showCreatePostForm();
-        //remettre createpostform() quand j'ai terminé les pages d'inscription
-        //showCreateAccountForm();
     });
     $('#abort').on("click", async function () {
         showPosts();
@@ -35,7 +33,9 @@ async function Init_UI() {
         toogleShowKeywords();
         showPosts();
     });
-
+    $("#profileCmd").on("click", function(){
+        showModifyAccountForm();
+    });
     installKeywordsOnkeyupEvent();
     await showPosts();
     start_Periodic_Refresh();
@@ -177,6 +177,7 @@ function showAbout() {
 }
 function getLoggedUser() {
     const userJson = sessionStorage.getItem('user');
+    console.log(userJson);
     if (userJson === undefined || userJson === null ) {
         return null;
     }
@@ -430,7 +431,7 @@ function updateDropDownMenu() {
         });
 
         $('#profileCmd').on("click", function() {
-            showProfileForm();
+            showModifyAccountForm();
         });
     } else {
         $('#loginCmd').on("click", function() {
@@ -693,10 +694,15 @@ function showCreateAccountForm() {
     $("#viewTitle").text("Création de compte");
     renderAccountForm();
 }
+function showModifyAccountForm(){
+    showForm();
+    $("#viewTitle").text("Modification de compte");
+    
+    renderAccountForm(getLoggedUser());
+}
 function showLoginAccountForm() {
     showForm();
     $("#viewTitle").text("Connexion");
-    renderLoginForm();
 }
 
 function renderLoginForm(justCreated = false) {
@@ -791,6 +797,7 @@ function renderAccountForm(account = null){
                 class="form-control MatchedInput "
                 matchedInputId="Email"
                 placeholder="Vérification"
+                value="${account.Email}"
                 required
                 CustomErrorMessage= "Les courriels ne sont pas équivalents"
                 InvalidMessage="Les courriels ne sont pas équivalents"
@@ -812,6 +819,7 @@ function renderAccountForm(account = null){
                 type="password"
                 matchedInputId="Password"
                 placeholder="Vérification"
+                value="${account.Password}"
                 required
                 RequireMessage="Vérification requise"
                 InvalidMessage="Les mots de passes ne sont pas équivalents"
@@ -822,6 +830,7 @@ function renderAccountForm(account = null){
                           id="Name"
                           placeholder="Nom" 
                           required 
+                          value='${account.Name}'
                           RequireMessage = 'Veuillez entrer un nom'
             </>
             <label class="form-label">Avatar </label>
