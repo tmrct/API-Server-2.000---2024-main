@@ -83,6 +83,9 @@ class Accounts_API {
                     url: `${this.Host_URL()}/accounts/verify?id=${user.Id}&code=${code}`,
                     headers: { 'Authorization': `Bearer ${accessToken}` },
                     complete: data => {
+                        if (data.responseJSON) {
+                            sessionStorage.setItem("user", JSON.stringify(data.responseJSON)); // Update user in sessionStorage
+                        }
                         resolve({ data });
                     },
                     error: (xhr) => { Accounts_API.setHttpErrorState(xhr); resolve(null); }
