@@ -860,7 +860,6 @@ function renderAccountForm(account = null){
             account.Created = Local_to_UTC(Date.now());
         else{
             emailChanged == $('#Email').val() != getLoggedUser().Email;
-            // account.Authorizations = getLoggedUser().Authorizations;
         }
         account = await Accounts_API.Register(account, create);
         if (!Accounts_API.error && emailChanged) {
