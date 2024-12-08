@@ -17,14 +17,14 @@ class Accounts_API {
         this.error = true;
     }
     static async HEAD() {
-        Posts_API.initHttpState();
+        this.initHttpState();
         return new Promise(resolve => {
             $.ajax({
                 url: this.API_URL(),
                 type: 'HEAD',
                 contentType: 'text/plain',
                 complete: data => { resolve(data.getResponseHeader('ETag')); },
-                error: (xhr) => { Accounts_API.setHttpErrorState(xhr); resolve(null); }
+                error: (xhr) => { this.setHttpErrorState(xhr); resolve(null); }
             });
         });
     }
@@ -36,16 +36,17 @@ class Accounts_API {
                 contentType: 'application/json',
                 url: this.Host_URL() + "/token",
                 data: JSON.stringify(loginInfo),
-                complete: data => { 
+                complete: data => {
                     sessionStorage.setItem("access_token", data.responseJSON.Access_token);
-                    sessionStorage.setItem("user", JSON.stringify(data.responseJSON.User));                    resolve({data});            
-            },
-                error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
+                    sessionStorage.setItem("user", JSON.stringify(data.responseJSON.User));
+                    resolve({ data });
+                },
+                error: (xhr) => { this.setHttpErrorState(xhr); resolve(null); }
             });
         });
     }
     static async logout() {
-        this.initHttpState(); // Initialize error state tracking if needed
+        this.initHttpState();
         return new Promise(resolve => {
             const userJson = sessionStorage.getItem("user");
             const user = userJson ? JSON.parse(userJson) : null;
@@ -53,14 +54,14 @@ class Accounts_API {
                 $.ajax({
                     method: 'GET',
                     contentType: 'application/json',
-                    url: `${this.Host_URL()}/accounts/logout/${user.Id}`, // Include userId in the URL
-                    data: { userId: user.Id }, // Correctly format the data
+                    url: `${this.Host_URL()}/accounts/logout/${user.Id}`,
+                    data: { userId: user.Id },
                     complete: data => {
                         sessionStorage.removeItem("access_token");
                         sessionStorage.removeItem("user");
                         resolve({ data });
                     },
-                    error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
+                    error: (xhr) => { this.setHttpErrorState(xhr); resolve(null); }
                 });
             } else {
                 // Handle case where user is not found in sessionStorage
@@ -71,7 +72,7 @@ class Accounts_API {
         });
     }
     static async Verify(code) {
-        this.initHttpState(); // Initialize error state tracking if needed
+        this.initHttpState();
         return new Promise(resolve => {
             const userJson = sessionStorage.getItem("user");
             const user = userJson ? JSON.parse(userJson) : null;
@@ -88,7 +89,7 @@ class Accounts_API {
                         }
                         resolve({ data });
                     },
-                    error: (xhr) => { Accounts_API.setHttpErrorState(xhr); resolve(null); }
+                    error: (xhr) => { this.setHttpErrorState(xhr); resolve(null); }
                 });
             } else {
                 // Handle case where access token or user is not found in sessionStorage
@@ -101,15 +102,15 @@ class Accounts_API {
     }
 
     static async Register(data, create = true) {
-        Accounts_API.initHttpState();
+        this.initHttpState();
         return new Promise(resolve => {
             $.ajax({
-                url: create ? this.Host_URL() + "/accounts/register" : this.Host_URL() + "/accounts/" + data.Id,
+                url: create ? this.Host_URL() + "/accounts/register" : this.Host_URL() + "/accounts/modify",
                 type: create ? "POST" : "PUT",
                 contentType: 'application/json',
                 data: JSON.stringify(data),
                 complete: (data) => { resolve(data); },
-                error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
+                error: (xhr) => { this.setHttpErrorState(xhr); resolve(null); }
             });
         });
     }

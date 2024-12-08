@@ -31,7 +31,7 @@ export default class AccountsController extends Controller {
             this.HttpContext.response.badRequest("User ID is missing.");
             return;
         }
-    
+
         // Check if the user has permissions to view the requested user info
         if (AccessControl.readGranted(this.HttpContext.authorizations, AccessControl.user())) {
             const user = this.repository.get(userId); // Fetch user from the repository
@@ -43,7 +43,7 @@ export default class AccountsController extends Controller {
                     Email: user.Email,
                     Created: user.Created,
                     Authorizations: user.Authorizations,
-                    Avatar : user.Avatar
+                    Avatar: user.Avatar
                 };
                 this.HttpContext.response.JSON(userInfo);
             } else {
@@ -53,7 +53,7 @@ export default class AccountsController extends Controller {
             this.HttpContext.response.unAuthorized("Access denied.");
         }
     }
-    
+
     // POST: /token body payload[{"Email": "...", "Password": "..."}]
     login(loginInfo) {
         if (loginInfo) {
