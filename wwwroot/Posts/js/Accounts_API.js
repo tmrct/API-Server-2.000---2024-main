@@ -84,6 +84,9 @@ class Accounts_API {
                     url: `${this.Host_URL()}/accounts/verify?id=${user.Id}&code=${code}`,
                     headers: { 'Authorization': `Bearer ${accessToken}` },
                     complete: data => {
+                        if (data.responseJSON) {
+                            sessionStorage.setItem("user", JSON.stringify(data.responseJSON)); // Update user in sessionStorage
+                        }
                         resolve({ data });
                     },
                     error: (xhr) => { this.setHttpErrorState(xhr); resolve(null); }
@@ -101,10 +104,12 @@ class Accounts_API {
     static async Register(data, create = true) {
         this.initHttpState();
         return new Promise(resolve => {
+            const accessToken = sessionStorage.getItem("access_token");
             $.ajax({
                 url: create ? this.Host_URL() + "/accounts/register" : this.Host_URL() + "/accounts/modify",
                 type: create ? "POST" : "PUT",
                 contentType: 'application/json',
+                headers: { 'Authorization': `Bearer ${accessToken}` },
                 data: JSON.stringify(data),
                 complete: (data) => { resolve(data); },
                 error: (xhr) => { this.setHttpErrorState(xhr); resolve(null); }

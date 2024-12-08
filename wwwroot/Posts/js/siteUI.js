@@ -285,16 +285,27 @@ function renderVerificationForm() {
 function renderPost(post, loggedUser = null) {
     let date = convertToFrenchDate(UTC_To_Local(post.Date));
     let crudIcon = '';
+    let likesCount = post.Likes ? Object.keys(post.Likes).length : 0;
     if (loggedUser) {
-        if (loggedUser.isSuper) {
-            // Super user can edit, delete, and like
-            crudIcon = `
-                <span class="editCmd cmdIconSmall fa fa-pencil" postId="${post.Id}" title="Modifier nouvelle"></span>
-                <span class="deleteCmd cmdIconSmall fa fa-trash" postId="${post.Id}" title="Effacer nouvelle"></span>
-                <span class="likeCmd cmdIconSmall fa fa-thumbs-up" postId="${post.Id}" title="Aimer la nouvelle"></span>
+        $("#createPost").hide();
+        crudIcon = `
+            <span></span>
+            <span></span>
+            <span class="likeCmd cmdIconSmall fa fa-thumbs-up" postId="${post.Id}" title="Aimer la nouvelle"></span>
+            <span class="likesCount">${likesCount}</span>
             `;
-        } else if (loggedUser.isAdmin) {
+        if (loggedUser.Id === post.UserId && loggedUser.isSuper) {
+            $("#createPost").show();
+            // User can edit and delete their own posts
+            crudIcon = `
+            <span class="editCmd cmdIconSmall fa fa-pencil" postId="${post.Id}" title="Modifier nouvelle"></span>
+            <span class="deleteCmd cmdIconSmall fa fa-trash" postId="${post.Id}" title="Effacer nouvelle"></span>
+            <span class="likeCmd cmdIconSmall fa fa-thumbs-up" postId="${post.Id}" title="Aimer la nouvelle"></span>
+            <span class="likesCount">${likesCount}</span>
+            `;
+        }  else if (loggedUser.isAdmin) {
             // Admin can only delete
+            $("#createPost").hide();
             crudIcon = `
                 <span></span>
                 <span></span>
@@ -347,9 +358,13 @@ function updateDropDownMenu() {
     let DDMenu = $("#DDMenu");
     let selectClass = selectedCategory === "" ? "fa-check" : "fa-fw";
     DDMenu.empty();
-
     if (loggedUser) {
         // User is logged in
+        if(loggedUser.isSuper){
+            $("#createPost").show();
+        }
+    
+        $("#createPost").hide();
         DDMenu.append($(`
             <div class="dropdown-item menuItemLayout" id="userCmd">
             <img src="${loggedUser.Avatar}" alt="Avatar" class="avatar" style="width: 35px; height: 35px; border-radius: 50%;">
@@ -366,6 +381,7 @@ function updateDropDownMenu() {
             <div class="dropdown-divider"></div>
         `));
         if (loggedUser.isAdmin) {
+            $("#createPost").hide();
             DDMenu.append($(`
                 <div class="dropdown-item" id="manageUsersCmd">
                     <i class="menuIcon fa fa-users mx-2"></i> Gestion des usagers
@@ -376,6 +392,7 @@ function updateDropDownMenu() {
         
     } else {
         // User is not logged in
+        $("#createPost").hide();
         DDMenu.append($(`
             <div class="dropdown-item" id="loginCmd">
                 <i class="menuIcon fa fa-sign-in mx-2"></i> Connexion
@@ -589,7 +606,6 @@ function newPost() {
     Post.Text = "";
     Post.Image = "news-logo-upload.png";
     Post.Category = "";
-    Post.AuthorId = 1;
     return Post;
 }
 function renderPostForm(post = null) {
@@ -663,7 +679,6 @@ function renderPostForm(post = null) {
         if (create || !('keepDate' in post))
             post.Date = Local_to_UTC(Date.now());
         delete post.keepDate;
-        //post.AuthorId = await Posts_API.GetLoggedInUser();
         post = await Posts_API.Save(post, create);
         if (!Posts_API.error) {
             await showPosts();
