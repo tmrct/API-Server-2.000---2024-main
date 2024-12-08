@@ -22,8 +22,6 @@ async function Init_UI() {
     postsPanel = new PageManager('postsScrollPanel', 'postsPanel', 'postSample', renderPosts);
     $('#createPost').on("click", async function () {
         showCreatePostForm();
-        //remettre createpostform() quand j'ai terminé les pages d'inscription
-        //showCreateAccountForm();
     });
     $('#abort').on("click", async function () {
         showPosts();
@@ -35,7 +33,9 @@ async function Init_UI() {
         toogleShowKeywords();
         showPosts();
     });
-
+    $("#profileCmd").on("click", function(){
+        showModifyAccountForm();
+    });
     installKeywordsOnkeyupEvent();
     await showPosts();
     start_Periodic_Refresh();
@@ -430,7 +430,7 @@ function updateDropDownMenu() {
         });
 
         $('#profileCmd').on("click", function() {
-            showProfileForm();
+            showModifyAccountForm();
         });
     } else {
         $('#loginCmd').on("click", function() {
@@ -693,6 +693,12 @@ function showCreateAccountForm() {
     $("#viewTitle").text("Création de compte");
     renderAccountForm();
 }
+function showModifyAccountForm(){
+    showForm();
+    $("#viewTitle").text("Modification de compte");
+    
+    renderAccountForm(getLoggedUser());
+}
 function showLoginAccountForm() {
     showForm();
     $("#viewTitle").text("Connexion");
@@ -791,6 +797,7 @@ function renderAccountForm(account = null){
                 class="form-control MatchedInput "
                 matchedInputId="Email"
                 placeholder="Vérification"
+                value="${account.Email}"
                 required
                 CustomErrorMessage= "Les courriels ne sont pas équivalents"
                 InvalidMessage="Les courriels ne sont pas équivalents"
@@ -805,7 +812,6 @@ function renderAccountForm(account = null){
                 required
                 RequireMessage="Veuillez entrez un mot de passe"
                 InvalidMessage="Le mot de passe est invalide"
-                value="${account.Password}"
             />
             <input 
                 class="form-control MatchedInput"
@@ -822,6 +828,7 @@ function renderAccountForm(account = null){
                           id="Name"
                           placeholder="Nom" 
                           required 
+                          value='${account.Name}'
                           RequireMessage = 'Veuillez entrer un nom'
             </>
             <label class="form-label">Avatar </label>
@@ -847,13 +854,20 @@ function renderAccountForm(account = null){
     });
     $('#accountForm').on("submit", async function (event) {
         event.preventDefault();
+        emailChanged = true;
         let account = getFormData($("#accountForm"));
         if (create)
             account.Created = Local_to_UTC(Date.now());
-        console.log(account);
+        else{
+            emailChanged == $('#Email').val() != getLoggedUser().Email;
+            // account.Authorizations = getLoggedUser().Authorizations;
+        }
         account = await Accounts_API.Register(account, create);
-        if (!Accounts_API.error) {
+        if (!Accounts_API.error && emailChanged) {
             await showVerificationFormCreated();
+        }
+        else if(!Accounts_API.error && !emailChanged){
+            await showPosts();
         }
         else
             showError("Une erreur est survenue! ", Accounts_API.currentHttpError);
