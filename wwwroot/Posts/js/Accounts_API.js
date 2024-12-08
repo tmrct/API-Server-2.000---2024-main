@@ -101,12 +101,12 @@ class Accounts_API {
         Accounts_API.initHttpState();
         return new Promise(resolve => {
             $.ajax({
-                url: create ? this.Host_URL() + "/accounts/register" : this.Host_URL() + "/accounts/" + data.Id,
+                url: create ? this.Host_URL() + "/accounts/register" : this.Host_URL() + "/accounts/modify",
                 type: create ? "POST" : "PUT",
                 contentType: 'application/json',
                 data: JSON.stringify(data),
                 complete: (data) => { resolve(data); },
-                error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
+                error: (xhr) => { Accounts_API.setHttpErrorState(xhr); resolve(null); }
             });
         });
     }

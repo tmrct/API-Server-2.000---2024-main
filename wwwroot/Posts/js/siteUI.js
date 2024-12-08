@@ -177,7 +177,6 @@ function showAbout() {
 }
 function getLoggedUser() {
     const userJson = sessionStorage.getItem('user');
-    console.log(userJson);
     if (userJson === undefined || userJson === null ) {
         return null;
     }
@@ -703,6 +702,7 @@ function showModifyAccountForm(){
 function showLoginAccountForm() {
     showForm();
     $("#viewTitle").text("Connexion");
+    renderLoginForm();
 }
 
 function renderLoginForm(justCreated = false) {
@@ -856,13 +856,20 @@ function renderAccountForm(account = null){
     });
     $('#accountForm').on("submit", async function (event) {
         event.preventDefault();
+        emailChanged = true;
         let account = getFormData($("#accountForm"));
         if (create)
             account.Created = Local_to_UTC(Date.now());
-        console.log(account);
+        else{
+            emailChanged == $('#Email').val() != getLoggedUser().Email;
+        }
+        console.log(emailChanged);
         account = await Accounts_API.Register(account, create);
-        if (!Accounts_API.error) {
+        if (!Accounts_API.error && emailChanged) {
             await showVerificationFormCreated();
+        }
+        else if(!Accounts_API.error && !emailChanged){
+            await showPosts();
         }
         else
             showError("Une erreur est survenue! ", Accounts_API.currentHttpError);
