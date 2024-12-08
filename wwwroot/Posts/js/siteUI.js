@@ -781,8 +781,8 @@ function renderAccountForm(account = null){
     $("#form").empty();
     $("#form").append(`
         <form class="form" id="accountForm">
-            <input type="hidden" id="Id" value="${account.Id}"/>
-             <input type="hidden" id="Date" value="${account.Date}"/>
+            <input type="hidden" name="Id" id="Id" value="${account.Id}"/>
+             <input type="hidden" name="Created" id="Created" value="${account.Date}"/>
             <label for="Email" class="form-label">Adresse de courriel </label>
             <input 
                 class="form-control Email"
@@ -809,7 +809,7 @@ function renderAccountForm(account = null){
                 id="Password"
                 type="password"
                 placeholder="Mot de passe"
-                required
+                ${create ? "required" : ""}
                 RequireMessage="Veuillez entrez un mot de passe"
                 InvalidMessage="Le mot de passe est invalide"
             />
@@ -818,7 +818,7 @@ function renderAccountForm(account = null){
                 type="password"
                 matchedInputId="Password"
                 placeholder="Vérification"
-                required
+                ${create ? "required" : ""}
                 RequireMessage="Vérification requise"
                 InvalidMessage="Les mots de passes ne sont pas équivalents"
             />
@@ -854,18 +854,14 @@ function renderAccountForm(account = null){
     });
     $('#accountForm').on("submit", async function (event) {
         event.preventDefault();
-        emailChanged = true;
         let account = getFormData($("#accountForm"));
         if (create)
             account.Created = Local_to_UTC(Date.now());
-        else{
-            emailChanged == $('#Email').val() != getLoggedUser().Email;
-        }
         account = await Accounts_API.Register(account, create);
-        if (!Accounts_API.error && emailChanged) {
+        if (!Accounts_API.error && create) {
             await showVerificationFormCreated();
         }
-        else if(!Accounts_API.error && !emailChanged){
+        else if(!Accounts_API.error && !create){
             await showPosts();
         }
         else
