@@ -812,14 +812,12 @@ function renderAccountForm(account = null){
                 required
                 RequireMessage="Veuillez entrez un mot de passe"
                 InvalidMessage="Le mot de passe est invalide"
-                value="${account.Password}"
             />
             <input 
                 class="form-control MatchedInput"
                 type="password"
                 matchedInputId="Password"
                 placeholder="Vérification"
-                value="${account.Password}"
                 required
                 RequireMessage="Vérification requise"
                 InvalidMessage="Les mots de passes ne sont pas équivalents"
@@ -862,8 +860,8 @@ function renderAccountForm(account = null){
             account.Created = Local_to_UTC(Date.now());
         else{
             emailChanged == $('#Email').val() != getLoggedUser().Email;
+            // account.Authorizations = getLoggedUser().Authorizations;
         }
-        console.log(emailChanged);
         account = await Accounts_API.Register(account, create);
         if (!Accounts_API.error && emailChanged) {
             await showVerificationFormCreated();

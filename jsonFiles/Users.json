@@ -202,5 +202,19 @@
             "readAccess": 1,
             "writeAccess": 1
         }
+    },
+    {
+        "Email": "randomerpro@gmail.com",
+        "Password": "password",
+        "Name": "Korm",
+        "Avatar": "a0b287e1-b584-11ef-98f3-e30fc8f2a7f3.webp",
+        "Created": 1733694671,
+        "VerifyCode": "verified",
+        "Authorizations": {
+            "readAccess": 1,
+            "writeAccess": 1
+        },
+        "Verifycode": 789348,
+        "Id": "a0b287e0-b584-11ef-98f3-e30fc8f2a7f3"
     }
 ]
