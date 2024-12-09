@@ -286,21 +286,34 @@ function renderPost(post, loggedUser = null) {
     let date = convertToFrenchDate(UTC_To_Local(post.Date));
     let crudIcon = '';
     let likesCount = post.Likes ? Object.keys(post.Likes).length : 0;
+
+    // Determine if loggedUser has liked the post
+    let likedByUser = false;
+    if (loggedUser && post.Likes) {
+        likedByUser = Object.values(post.Likes).includes(loggedUser.Id);
+    }
+
+    // Set the like icon based on whether the user has liked the post or not
+    let likeIconClass = likedByUser ? ' like fa-thumbs-up fa-solid' : 'like fa-thumbs-up fa-regular';
+
     if (loggedUser) {
         $("#createPost").hide();
         crudIcon = `
             <span></span>
             <span></span>
-            <span class="likeCmd cmdIconSmall fa fa-thumbs-up" postId="${post.Id}" title="Aimer la nouvelle"></span>
+            <span class="${likeIconClass} cmdIconSmall" postId="${post.Id}" title="Aimer la nouvelle"></span>
             <span class="likesCount">${likesCount}</span>
             `;
+        if(loggedUser.isSuper){
+        $("#createPost").show();
+        }
         if (loggedUser.Id === post.UserId && loggedUser.isSuper) {
             $("#createPost").show();
             // User can edit and delete their own posts
             crudIcon = `
             <span class="editCmd cmdIconSmall fa fa-pencil" postId="${post.Id}" title="Modifier nouvelle"></span>
             <span class="deleteCmd cmdIconSmall fa fa-trash" postId="${post.Id}" title="Effacer nouvelle"></span>
-            <span class="likeCmd cmdIconSmall fa fa-thumbs-up" postId="${post.Id}" title="Aimer la nouvelle"></span>
+            <span class="${likeIconClass} cmdIconSmall" postId="${post.Id}" title="Aimer la nouvelle"></span>
             <span class="likesCount">${likesCount}</span>
             `;
         }  else if (loggedUser.isAdmin) {
@@ -317,6 +330,7 @@ function renderPost(post, loggedUser = null) {
         // No icons for unauthorized users
         crudIcon = ''; 
     }
+
     return $(`
         <div class="post" id="${post.Id}">
             <div class="postHeader">
@@ -336,6 +350,36 @@ function renderPost(post, loggedUser = null) {
         </div>
     `);
 }
+$(".like").off();
+$(document).on("click", ".like", async function () {
+    let loggedUserId = getLoggedUser().Id;
+    let postId = $(this).attr("postId");
+    let post = await Posts_API.Get(postId);
+
+    let likesArray = Object.values(post.data.Likes);
+
+        if (likesArray.includes(loggedUserId)) {
+            likesArray = likesArray.filter(userId => userId !== loggedUserId);
+        } else {
+            likesArray.push(loggedUserId);
+        }
+
+        post.data.Likes = {};
+        likesArray.forEach(userId => {
+            post.data.Likes[userId] = userId;
+        });
+        const baseURL = "http://localhost:5000/assetsRepository/";
+        if (post.data.Image.startsWith(baseURL)) {
+            post.data.Image = post.data.Image.replace(baseURL, "");
+        }
+    await Posts_API.addLike(post);
+    if (!Posts_API.error) {
+        await showPosts(true);
+    } else {
+        showError("Une erreur est survenue! ", Posts_API.currentHttpError);
+    }
+});
+
 async function compileCategories() {
     categories = [];
     let response = await Posts_API.GetQuery("?fields=category&sort=category");
@@ -676,8 +720,17 @@ function renderPostForm(post = null) {
         let post = getFormData($("#postForm"));
         if (post.Category != selectedCategory)
             selectedCategory = "";
-        if (create || !('keepDate' in post))
+        if (create || !('keepDate' in post)){
             post.Date = Local_to_UTC(Date.now());
+            post.Likes = {};
+            post.UserId = getLoggedUser().Id;
+        }
+        else{
+            let response = await Posts_API.Get(post.Id);
+            post.Likes = response.data.Likes;
+            post.UserId = getLoggedUser().Id;
+        }
+        
         delete post.keepDate;
         post = await Posts_API.Save(post, create);
         if (!Posts_API.error) {
