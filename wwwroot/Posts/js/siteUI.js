@@ -366,7 +366,7 @@ $(document).on("click", ".like", async function () {
 
         post.data.Likes = {};
         likesArray.forEach(userId => {
-            post.data.Likes["userId"] = userId;
+            post.data.Likes[userId] = userId;
         });
         const baseURL = "http://localhost:5000/assetsRepository/";
         if (post.data.Image.startsWith(baseURL)) {

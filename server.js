@@ -20,7 +20,7 @@ RouteRegister.add('POST', 'accounts', 'block');
 RouteRegister.add('POST', 'accounts', 'promote');
 RouteRegister.add('GET', 'accounts', 'getUserInfo');
 RouteRegister.add('GET', 'accounts', 'getConnectedUser');
-RouteRegister.add('POST', 'posts', 'addLike');
+RouteRegister.add('PUT', 'posts', 'addLike');
 
 
 let server = new APIServer();

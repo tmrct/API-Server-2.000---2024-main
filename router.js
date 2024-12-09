@@ -1,5 +1,6 @@
 import RouteRegister from './routeRegister.js';
 import AccountsController from "./controllers/AccountsController.js";
+import PostsController from './controllers/PostsController.js';
 
 export const API_EndPoint = function (HttpContext) {
     return new Promise(async resolve => {
@@ -113,3 +114,32 @@ export const TOKEN_EndPoint = function (HttpContext) {
     return false;
 
 }
+
+export const PUT_EndPoint = function (HttpContext) {
+    if (HttpContext.req.url.startsWith('/api/posts/') && HttpContext.req.method === "PUT") {
+        try {
+            const action = HttpContext.path.id; // Extract the action or post ID from the path
+
+            let postsController = new PostsController(HttpContext);
+
+                if (HttpContext.payload) {
+                    // Call the addLike method and pass the payload
+                    postsController.addLike(HttpContext.payload, HttpContext.payload.Id);
+                } else {
+                    HttpContext.response.badRequest("Payload is required for adding a like.");
+                }
+
+            return true; // Indicate the request was handled
+        } catch (error) {
+            console.error("PUT_EndPoint Error message: \n", error.message);
+            console.error("Stack: \n", error.stack);
+            HttpContext.response.internalServerError("An unexpected error occurred.");
+            return true;
+        }
+    }
+
+    // Request not consumed by this middleware
+    return false;
+};
+
+

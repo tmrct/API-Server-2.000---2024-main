@@ -32,6 +32,7 @@ export default class APIServer {
         // API middlewares
         this.middlewaresPipeline.add(CachedRequests.get);
         this.middlewaresPipeline.add(router.TOKEN_EndPoint);
+        this.middlewaresPipeline.add(router.PUT_EndPoint);
         this.middlewaresPipeline.add(router.Registered_EndPoint);
         this.middlewaresPipeline.add(router.API_EndPoint);
     }

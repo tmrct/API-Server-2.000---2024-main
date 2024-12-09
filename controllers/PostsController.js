@@ -1,15 +1,16 @@
 import PostModel from '../models/post.js';
 import Repository from '../models/repository.js';
 import Controller from './Controller.js';
+import AccessControl from '../accessControl.js';
 
 export default class PostModelsController extends Controller {
     constructor(HttpContext) {
         super(HttpContext, new Repository(new PostModel()));
     }
-    addLike(data) {
+    addLike(data, id) {
         if (AccessControl.writeGranted(this.HttpContext.authorizations, this.requiredAuthorizations)) {
-            if (this.HttpContext.path.id !== '') {
-                data = this.repository.update(this.HttpContext.path.id, data, false);
+            if (id !== '') {
+                data = this.repository.update(id, data, false);
                 if (this.repository.model.state.isValid) {
                     this.HttpContext.response.accepted(data);
                 } else {
