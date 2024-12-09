@@ -103,11 +103,13 @@ class Accounts_API {
 
     static async Register(data, create = true) {
         this.initHttpState();
+        const accessToken = sessionStorage.getItem("access_token");
         return new Promise(resolve => {
             const accessToken = sessionStorage.getItem("access_token");
             $.ajax({
                 url: create ? this.Host_URL() + "/accounts/register" : this.Host_URL() + "/accounts/modify",
                 type: create ? "POST" : "PUT",
+                headers: { 'Authorization': `Bearer ${accessToken}` },
                 contentType: 'application/json',
                 headers: { 'Authorization': `Bearer ${accessToken}` },
                 data: JSON.stringify(data),
@@ -116,5 +118,4 @@ class Accounts_API {
             });
         });
     }
-
 }
