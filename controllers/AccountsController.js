@@ -239,7 +239,7 @@ export default class AccountsController extends Controller {
 
     // GET:account/remove/id
     remove(id) { // warning! this is not an API endpoint 
-        // todo make sure that the requester has legitimity to delete ethier itself or its an admin
+        // todo make sure that the requester has legitimity to delete either itself or if it's an admin
         if (AccessControl.writeGrantedAdminOrOwner(this.HttpContext.authorizations, this.requiredAuthorizations, id)) {
             // todo
         }

@@ -298,7 +298,7 @@ function renderDeleteAccountConfirmation() {
         </form>
         `);
   $("#confirmDeleteAccount").click(function () {
-    console.log("hi");
+    Accounts_API.Delete();
   });
   $("#cancelDeletion").click(function () {
     showModifyAccountForm();
