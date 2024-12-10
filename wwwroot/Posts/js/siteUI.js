@@ -381,12 +381,18 @@ $(document).on("click", ".like", async function () {
         if (post.data.Image.startsWith(baseURL)) {
             post.data.Image = post.data.Image.replace(baseURL, "");
         }
-    await Posts_API.addLike(post);
-    if (!Posts_API.error) {
-        await showPosts();
-    } else {
-        showError("Une erreur est survenue! ", Posts_API.currentHttpError);
-    }
+        const scrollPanel = $("#postsScrollPanel");
+        const scrollPosition = scrollPanel.scrollTop();
+    
+        await Posts_API.addLike(post);
+        if (!Posts_API.error) {
+            await showPosts();
+            // Restore the scroll position after rendering posts
+        } else {
+            showError("Une erreur est survenue! ", Posts_API.currentHttpError);
+        }
+        scrollPanel.scrollTop(scrollPosition);
+
 });
 
 async function compileCategories() {
