@@ -10,6 +10,7 @@ import RouteRegister from './routeRegister.js';
 
 RouteRegister.add('GET', 'Bookmarks', 'list');
 RouteRegister.add('GET', 'accounts');
+RouteRegister.add('GET', 'accounts', 'getAvatar');
 RouteRegister.add('POST', 'accounts', 'register');
 RouteRegister.add('GET', 'accounts', 'verify');
 RouteRegister.add('GET', 'accounts', 'logout');
@@ -20,7 +21,7 @@ RouteRegister.add('POST', 'accounts', 'block');
 RouteRegister.add('POST', 'accounts', 'promote');
 RouteRegister.add('GET', 'accounts', 'getUserInfo');
 RouteRegister.add('GET', 'accounts', 'getConnectedUser');
-RouteRegister.add('GET','accounts','remove')
+RouteRegister.add('GET','accounts','remove');
 RouteRegister.add('PUT', 'posts', 'addLike');
 
 

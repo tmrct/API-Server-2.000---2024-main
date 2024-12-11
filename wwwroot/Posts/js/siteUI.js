@@ -896,6 +896,13 @@ function renderLoginForm(justCreated = false) {
     } else {
       showError("Une erreur est survenue! ", Accounts_API.currentHttpError);
     }
+
+    initTimeout(3, Accounts_API.logout.bind(Accounts_API));
+
+    // Reset the countdown whenever the user interacts with the page
+    $(document).on('mousemove keydown click', function() {
+        timeout();
+    });
   });
 
   $("#cancel").on("click", async function () {
