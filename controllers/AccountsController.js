@@ -200,6 +200,7 @@ export default class AccountsController extends Controller {
                         else
                             this.HttpContext.response.badRequest(this.repository.model.state.errors);
                     }
+
                 } else
                     this.HttpContext.response.notFound();
             } else
@@ -209,10 +210,24 @@ export default class AccountsController extends Controller {
     }
 
     // GET:account/remove/id
-    remove(id) { // warning! this is not an API endpoint 
-        // todo make sure that the requester has legitimity to delete ethier itself or its an admin
-        if (AccessControl.writeGrantedAdminOrOwner(this.HttpContext.authorizations, this.requiredAuthorizations, id)) {
-            // todo
+    remove(id) {
+        // todo make sure that the requester has legitimity to delete either itself or if it's an admin
+        if (AccessControl.writeGrantedAdminOrOwner(this.HttpContext, this.requiredAuthorizations, id)) {
+            //suppression de compte restant.
+            let userToDelete = this.repository.findByField("Id", id);
+            if (userToDelete) {
+                this.repository.remove(userToDelete.Id);
+            }
+            if (this.repository.model.state.isValid) {
+                this.HttpContext.response.accepted(`User with ID ${id} has been successfully removed.`);
+            } else {
+                // In case of failure in deletion
+                this.HttpContext.response.notFound("Failed to delete the user.");
+            }
+        } else {
+            // If the requester does not have permission to delete
+            this.HttpContext.response.unAuthorized("You are not authorized to remove this user.");
         }
+        //doit reset la cache ou whatever quand l'usager est deleted
     }
 }
