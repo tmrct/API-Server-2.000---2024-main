@@ -79,20 +79,28 @@ class Posts_API {
             });
         });
     }
-    static async addLike(post) {
+    static async addLike(post, accountDeletion = false) {
         Posts_API.initHttpState();
         return new Promise(resolve => {
-            let postId = post.data.Id;
-            let updatedData = { ...post.data };
+            let postId = "";
+            let updatedData = "";
+
+            if(accountDeletion == false){
+                postId = post.data.Id;
+                updatedData = { ...post.data };
+            }
+            else{
+                postId = post.Id;
+                updatedData = { ...post };
+            }
             $.ajax({
                 url: this.POSTS_API_URL() + "/addLike/" + postId,
                 type: "PUT",
                 contentType: 'application/json',
-                data: JSON.stringify(updatedData),
+                data: accountDeletion ? updatedData : JSON.stringify(updatedData),
                 success: (data) => { resolve(data); },
                 error: (xhr) => { Posts_API.setHttpErrorState(xhr); resolve(null); }
             });
         });
     }
-    
 }

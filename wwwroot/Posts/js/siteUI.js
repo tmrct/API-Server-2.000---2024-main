@@ -1025,6 +1025,12 @@ function renderDeleteAccountConfirmation() {
       if(post.UserId == currentUserId){
         await Posts_API.Delete(post.Id);
       }
+      else{
+        let likes = post.Likes;
+        if(likes && likes[currentUserId]){
+          await Posts_API.addLike(post,true);
+        }
+      }
     }
     // await Accounts_API.Delete();
   });
