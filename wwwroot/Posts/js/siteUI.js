@@ -41,6 +41,10 @@ async function Init_UI() {
   $("#profileCmd").on("click", function () {
     showModifyAccountForm();
   });
+  $("#manageUsersCmd").on("click", function () {
+    showUserManagement();
+  });
+  
   installKeywordsOnkeyupEvent();
   await showPosts();
   start_Periodic_Refresh();
@@ -806,6 +810,12 @@ function showModifyAccountForm() {
   $("#viewTitle").text("Modification de compte");
 
   renderAccountForm(getLoggedUser());
+}
+function showUserManagement() {
+  $("#commit").hide();
+  $("#viewTitle").text("Gestion des usagers");
+
+  renderUserManagement();
 }
 function showLoginAccountForm() {
   showForm();
