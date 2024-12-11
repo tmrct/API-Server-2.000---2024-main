@@ -45,6 +45,7 @@ async function Init_UI() {
     showUserManagement();
   });
   
+  
   installKeywordsOnkeyupEvent();
   await showPosts();
   start_Periodic_Refresh();
@@ -452,11 +453,15 @@ function updateDropDownMenu() {
       DDMenu.append(
         $(`
                 <div class="dropdown-item" id="manageUsersCmd">
-                    <i class="menuIcon fa fa-users mx-2"></i> Gestion des usagers
+                    <i class="menuIcon fa fa-users mx-2" id="manageUsersIcon"></i> Gestion des usagers
                 </div>
                 <div class="dropdown-divider"></div>
             `)
       );
+      $("#manageUsersCmd").on("click", function () {
+        showUserManagement();
+      });
+      
     }
   } else {
     // User is not logged in
@@ -894,7 +899,10 @@ function renderLoginForm(justCreated = false) {
     await showPosts();
   });
 }
-
+function renderUserManagement(){
+  let allUsers = Accounts_API.Get();
+  console.log(allUsers);
+}
 function renderAccountForm(account = null) {
   let create = account == null;
   if (create) account = newAccount();
