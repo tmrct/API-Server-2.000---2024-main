@@ -909,17 +909,12 @@ async function renderUserManagement() {
   $("#form").show();
   $("#form").empty();
 
-  $("#form").append(`
-    <form class="userManagement" id="userManagement">
-    `);
-
   for (const user of allUsers) {
     if (user.Id != getLoggedUser().Id) {
-      console.log(user);
-      userIsBlocked = user.isBlocked;
-      userIsAdmin = user.isAdmin;
-      userIsSuper = user.isSuper;
-      userId = user.Id;
+      let userIsBlocked = user.isBlocked;
+      let userIsAdmin = user.isAdmin;
+      let userIsSuper = user.isSuper;
+      let userId = user.Id;
       $("#form").append(`
           <div id="${userId}div" style="margin-top:2%;">
           <img class="avatar" style="width: 65px; height: 65px; border-radius: 50%; margin-left:2%;" src="${user.Avatar}"/>
@@ -928,37 +923,36 @@ async function renderUserManagement() {
           `);
       if (userIsAdmin) {
         $("#" + userId + "div").append(`
-              <span> Admin !!</span>
+              <span id="demote" userId="${userId}" title="Déproumouvoir l'usager administrateur à un usager ordinaire" style="cursor:pointer; margin-left:2%;"><i title="Déproumouvoir l'usager administrateur à un usager ordinaire" class="fa-solid fa-user-gear fa-lg"></i></span>
               `);
       } else if (userIsSuper) {
         $("#" + userId + "div").append(`
-              <span> Super !!</span>
-              <span style="cursor:pointer;"> <i class="fa-solid fa-trash fa-lg"></i></span>
+              <span id="promoteToAdmin" userId="${userId} title="Promouvoir le super usager à un usager administrateur" style="cursor:pointer; margin-left:2%;"> <i title="Promouvoir le super usager à un usager administrateur" class="fa-solid fa-user-graduate fa-lg"></i> </span>
+              <span id="deleteUser" userId="${userId} title="Supprimer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Supprimer l'usager" class="fa-solid fa-trash fa-lg"></i></span>
               `);
       } else {
         $("#" + userId + "div").append(`
-              <span> Normie !!</span>
-              <span style="cursor:pointer;"> <i class="fa-solid fa-trash fa-lg"></i></span>
+              <span id="promoteToSuper"  userId="${userId} title="Promouvoir l'usager ordinaire à un super usager" style="cursor:pointer; margin-left:2%;"> <i title="Promouvoir l'usager ordinaire à un super usager" class="fa-solid fa-user fa-lg"></i></span>
+              <span id="deleteUser" userId="${userId}" title="Supprimer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Supprimer l'usager" class="fa-solid fa-trash fa-lg"></i></span>
               `);
       }
       if (userIsBlocked) {
         $("#" + userId + "div").append(`
-              <span> Unblock me !!</span>
+              <span id="unblock" userId="${userId} title="Débloquer l'usager" style="cursor:pointer; margin-left:2%;"> <i  title="Débloquer l'usager" class="fa-solid fa-lock-open fa-lg"></i> </span>
               `);
       } else {
         $("#" + userId + "div").append(`
-              <span> Block me !!</span>
+              <span id="block" userId="${userId} title="Bloquer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Bloquer l'usager" class="fa-solid fa-user-lock fa-lg"></i> </span>
               `);
       }
       $("#form").append(`
           </div>
           </br>
           `);
+
+          $("#block").click()
     }
   }
-  $("#form").append(`
-      </form>
-      `);
 }
 function renderAccountForm(account = null) {
   let create = account == null;
