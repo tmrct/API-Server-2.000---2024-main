@@ -1017,18 +1017,18 @@ function renderDeleteAccountConfirmation() {
             <button id="cancelDeletion" class="btn btn-secondary" style="width:100%;"> Annuler </button>
         </form>
         `);
-  $("#confirmDeleteAccount").click( async function () {
+  $("#confirmDeleteAccount").click(function () {
     let currentUserId = getLoggedUser().Id;
-    let posts = await Posts_API.Get();
+    let posts = Posts_API.Get();
     posts = posts.data;
     for (const post of posts){
       if(post.UserId == currentUserId){
-        await Posts_API.Delete(post.Id);
+        Posts_API.Delete(post.Id);
       }
       else{
         let likes = post.Likes;
         if(likes && likes[currentUserId]){
-          await Posts_API.addLike(post,true);
+          Posts_API.addLike(post);
         }
       }
     }
