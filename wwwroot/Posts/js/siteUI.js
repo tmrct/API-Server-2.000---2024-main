@@ -1017,10 +1017,10 @@ function renderDeleteAccountConfirmation() {
             <button id="cancelDeletion" class="btn btn-secondary" style="width:100%;"> Annuler </button>
         </form>
         `);
-  $("#confirmDeleteAccount").click(function (event) {
+  $("#confirmDeleteAccount").click(async function (event) {
     event.preventDefault();
     let currentUserId = getLoggedUser().Id;
-    let posts = Posts_API.Get();
+    let posts = await Posts_API.Get();
     posts = posts.data;
     for (const post of posts){
       if(post.UserId == currentUserId){
