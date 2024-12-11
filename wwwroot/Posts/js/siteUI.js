@@ -913,20 +913,49 @@ async function renderUserManagement() {
     <form class="userManagement" id="userManagement">
     `);
 
-    for(const user of allUsers){
-      if(user.Id != getLoggedUser().Id){
-        console.log(user)
-        $("#form").append(`
-          <div style="margin-top:2%;">
+  for (const user of allUsers) {
+    if (user.Id != getLoggedUser().Id) {
+      console.log(user);
+      userIsBlocked = user.isBlocked;
+      userIsAdmin = user.isAdmin;
+      userIsSuper = user.isSuper;
+      userId = user.Id;
+      $("#form").append(`
+          <div id="${userId}div" style="margin-top:2%;">
           <img class="avatar" style="width: 65px; height: 65px; border-radius: 50%; margin-left:2%;" src="${user.Avatar}"/>
           <span style="margin-left:2%;"> ${user.Name} </span>
           <span style="margin-left:2%;"> ${user.Email} </span>
-
+          `);
+      if (userIsAdmin) {
+        $("#" + userId + "div").append(`
+              <span> Admin !!</span>
+              `);
+      } else if (userIsSuper) {
+        $("#" + userId + "div").append(`
+              <span> Super !!</span>
+              <span style="cursor:pointer;"> <i class="fa-solid fa-trash fa-lg"></i></span>
+              `);
+      } else {
+        $("#" + userId + "div").append(`
+              <span> Normie !!</span>
+              <span style="cursor:pointer;"> <i class="fa-solid fa-trash fa-lg"></i></span>
+              `);
+      }
+      if (userIsBlocked) {
+        $("#" + userId + "div").append(`
+              <span> Unblock me !!</span>
+              `);
+      } else {
+        $("#" + userId + "div").append(`
+              <span> Block me !!</span>
+              `);
+      }
+      $("#form").append(`
           </div>
           </br>
           `);
-      }
     }
+  }
   $("#form").append(`
       </form>
       `);
