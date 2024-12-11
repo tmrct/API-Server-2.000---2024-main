@@ -212,9 +212,9 @@ export default class AccountsController extends Controller {
     remove(id) {
         // todo make sure that the requester has legitimity to delete either itself or if it's an admin
         if (AccessControl.writeGrantedAdminOrOwner(this.HttpContext, this.requiredAuthorizations, id)) {
-            // En premier lieux delete les posts, ensuite les likes, ensuite le compte.
+           //suppression de compte restant.
 
-            
+
 
         }
     }

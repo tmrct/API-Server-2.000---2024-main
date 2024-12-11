@@ -1017,7 +1017,8 @@ function renderDeleteAccountConfirmation() {
             <button id="cancelDeletion" class="btn btn-secondary" style="width:100%;"> Annuler </button>
         </form>
         `);
-  $("#confirmDeleteAccount").click(function () {
+  $("#confirmDeleteAccount").click(function (event) {
+    event.preventDefault();
     let currentUserId = getLoggedUser().Id;
     let posts = Posts_API.Get();
     posts = posts.data;
@@ -1032,7 +1033,7 @@ function renderDeleteAccountConfirmation() {
         }
       }
     }
-    // await Accounts_API.Delete();
+    // Accounts_API.Delete();
   });
 
   $("#cancelDeletion").click(function () {
