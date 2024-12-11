@@ -13,7 +13,7 @@
         "VerifyCode": "verified"
     },
     {
-        "Email": "nicolas.chourot@gmail.com",
+        "Email": "nicolaschourot@gmail.ca",
         "Password": "password",
         "Name": "Nicolas Chourot",
         "Avatar": "04e2be90-a45c-11ef-9487-5be10abe1de4.jpeg",
@@ -24,20 +24,6 @@
         },
         "VerifyCode": "verified",
         "Id": "02a2b9a0-a45c-11ef-9487-5be10abe1de4"
-    },
-    {
-        "Email": "Saliha.Yacoub@clg.qc.ca",
-        "Password": "password",
-        "Name": "Saliha Yacoub",
-        "Avatar": "5b156ce0-46c0-11ee-9c7d-4dfffb69e19c.png",
-        "Created": 1731790056,
-        "VerifyCode": "verified",
-        "Authorizations": {
-            "readAccess": 2,
-            "writeAccess": 2
-        },
-        "Verifycode": "verified",
-        "Id": "5b156ce0-46c0-11ee-9c7d-4dfffb69e19c"
     },
     {
         "Email": "Stephane.Chasse@clg.qc.ca",
@@ -54,16 +40,17 @@
         "Id": "78f177e0-46c0-11ee-9c7d-4dfffb69e19c"
     },
     {
-        "Created": 1733913729,
         "Email": "Patrice.Roy@clg.qc.ca",
         "Password": "password",
         "Name": "Patrice Roy",
-        "Avatar": "acd73070-b782-11ef-b43c-73962b07b8e4.webp",
+        "Avatar": "a634d710-46c0-11ee-9c7d-4dfffb69e19c.png",
+        "Created": 1731790056,
+        "VerifyCode": "verified",
         "Authorizations": {
             "readAccess": 2,
             "writeAccess": 2
         },
-        "VerifyCode": "verified",
+        "Verifycode": "verified",
         "Id": "a634d710-46c0-11ee-9c7d-4dfffb69e19c"
     },
     {
@@ -78,45 +65,5 @@
         },
         "VerifyCode": "verified",
         "Id": "f11ee960-aa82-11ef-b942-e7f097a2ee7a"
-    },
-    {
-        "Email": "georges.el.korm@gmail.com",
-        "Password": "password",
-        "Name": "korn",
-        "Avatar": "6a458651-b3f7-11ef-8745-2d02144ecf2c.png",
-        "Created": 1733524069,
-        "VerifyCode": "verified",
-        "Authorizations": {
-            "readAccess": 2,
-            "writeAccess": 2
-        },
-        "Id": "6a458650-b3f7-11ef-8745-2d02144ecf2c"
-    },
-    {
-        "Created": 1733872779,
-        "Email": "tristanmarcotte@outlook.com",
-        "Password": "password",
-        "Name": "Tristan Marcotte",
-        "Avatar": "78b2adf0-b3f5-11ef-911f-6d556a288090.jpeg",
-        "Authorizations": {
-            "readAccess": 1,
-            "writeAccess": 1
-        },
-        "VerifyCode": "verified",
-        "Id": "78b286e0-b3f5-11ef-911f-6d556a288090"
-    },
-    {
-        "Email": "randomerpro@gmail.com",
-        "Password": "password",
-        "Name": "Korm",
-        "Avatar": "a0b287e1-b584-11ef-98f3-e30fc8f2a7f3.webp",
-        "Created": 1733694671,
-        "VerifyCode": "verified",
-        "Authorizations": {
-            "readAccess": 1,
-            "writeAccess": 1
-        },
-        "Verifycode": 789348,
-        "Id": "a0b287e0-b584-11ef-98f3-e30fc8f2a7f3"
     }
 ]
