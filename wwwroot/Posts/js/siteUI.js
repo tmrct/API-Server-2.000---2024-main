@@ -187,7 +187,7 @@ function showAbout() {
 }
 function getLoggedUser() {
   const userJson = sessionStorage.getItem("user");
-  if (userJson === undefined || userJson === null) {
+  if (userJson === undefined || userJson === null || userJson == "undefined" || userJson == 'undefined') {
     return null;
   }
   return JSON.parse(userJson); // Parse JSON string to object
@@ -982,10 +982,7 @@ function renderAccountForm(account = null) {
   });
   addConflictValidation(Accounts_API.Conflict(), "Email", "createAccount");
 
-  $("#commit").click(function () {
-    $("#commit").off();
-    return $("#createAccount").trigger("click");
-  });
+
   $("#accountForm").on("submit", async function (event) {
     event.preventDefault();
     let account = getFormData($("#accountForm"));
@@ -1033,7 +1030,8 @@ function renderDeleteAccountConfirmation() {
         }
       }
     }
-    // Accounts_API.Delete();
+    Accounts_API.Delete();
+    showPosts();
   });
 
   $("#cancelDeletion").click(function () {
