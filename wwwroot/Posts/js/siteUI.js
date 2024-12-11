@@ -107,15 +107,17 @@ function intialView() {
   $("#errorContainer").hide();
   showSearchIcon();
 }
+
 async function showPosts(reset = false) {
-  intialView();
-  $("#viewTitle").text("Fil de nouvelles");
-  periodic_Refresh_paused = false;
-  await postsPanel.show(reset);
+        intialView();
+        $("#viewTitle").text("Fil de nouvelles");
+        periodic_Refresh_paused = false;
+        await postsPanel.show(reset);
 }
+
 async function showVerificationForm() {
-  $("#viewTitle").text("Vérification de compte");
-  periodic_Refresh_paused = false;
+    $("#viewTitle").text("Vérification de compte");
+    periodic_Refresh_paused = true;
 
   renderVerificationForm();
 }
@@ -218,40 +220,48 @@ function start_Periodic_Refresh() {
   }, periodicRefreshPeriod * 1000);
 }
 async function renderPosts(queryString) {
-  let endOfData = false;
-  queryString += "&sort=date,desc";
-  compileCategories();
-  if (selectedCategory != "") queryString += "&category=" + selectedCategory;
-  if (showKeywords) {
-    let keys = $("#searchKeys").val().replace(/[ ]/g, ",");
-    if (keys !== "")
-      queryString += "&keywords=" + $("#searchKeys").val().replace(/[ ]/g, ",");
-  }
-  addWaitingGif();
-  let response = await Posts_API.Get(queryString);
-  //let user = await Posts_API.GetLoggedInUser();
-  if (!Posts_API.error) {
-    currentETag = response.ETag;
-    currentPostsCount = parseInt(currentETag.split("-")[0]);
-    let Posts = response.data;
-    if (Posts.length > 0) {
-      Posts.forEach((Post) => {
-        postsPanel.append(renderPost(Post, getLoggedUser()));
-      });
-    } else endOfData = true;
-    linefeeds_to_Html_br(".postText");
-    highlightKeywords();
-    attach_Posts_UI_Events_Callback();
-  } else {
-    showError(Posts_API.currentHttpError);
-  }
-  removeWaitingGif();
-  return endOfData;
+    let loggedUser = getLoggedUser();
+    if (loggedUser == null || loggedUser.VerifyCode == "verified") {
+        let endOfData = false;
+        queryString += "&sort=date,desc";
+        compileCategories();
+        if (selectedCategory != "") queryString += "&category=" + selectedCategory;
+        if (showKeywords) {
+            let keys = $("#searchKeys").val().replace(/[ ]/g, ',');
+            if (keys !== "")
+                queryString += "&keywords=" + $("#searchKeys").val().replace(/[ ]/g, ',')
+        }
+        addWaitingGif();
+        let response = await Posts_API.Get(queryString);
+        //let user = await Posts_API.GetLoggedInUser();
+        if (!Posts_API.error) {
+            currentETag = response.ETag;
+            currentPostsCount = parseInt(currentETag.split("-")[0]);
+            let Posts = response.data;
+            if (Posts.length > 0) {
+                Posts.forEach(Post => {
+                    postsPanel.append(renderPost(Post, getLoggedUser()));
+                });
+            } else
+                endOfData = true;
+            linefeeds_to_Html_br(".postText");
+            highlightKeywords();
+            attach_Posts_UI_Events_Callback();
+        } else {
+            showError(Posts_API.currentHttpError);
+        }
+        removeWaitingGif();
+        return endOfData;
+    } else {
+        showVerificationForm();
+    }
 }
 function renderVerificationForm() {
-  $("#form").show();
-  $("#form").empty();
-  $("#form").append(`
+    $("#postsScrollPanel").hide();  
+    $("#form").show();
+    $("#abort").hide();
+    $("#form").empty();
+    $("#form").append(`
         <form class="form" id="verificationForm">
             <label for="VerificationCode" class="form-label">Code de vérification</label>
             <input 
@@ -389,20 +399,26 @@ $(document).on("click", ".like", async function () {
     likesArray.push(loggedUserId);
   }
 
-  post.data.Likes = {};
-  likesArray.forEach((userId) => {
-    post.data.Likes[userId] = userId;
-  });
-  const baseURL = "http://localhost:5000/assetsRepository/";
-  if (post.data.Image.startsWith(baseURL)) {
-    post.data.Image = post.data.Image.replace(baseURL, "");
-  }
-  await Posts_API.addLike(post);
-  if (!Posts_API.error) {
-    await showPosts(true);
-  } else {
-    showError("Une erreur est survenue! ", Posts_API.currentHttpError);
-  }
+        post.data.Likes = {};
+        likesArray.forEach(userId => {
+            post.data.Likes[userId] = userId;
+        });
+        const baseURL = "http://localhost:5000/assetsRepository/";
+        if (post.data.Image.startsWith(baseURL)) {
+            post.data.Image = post.data.Image.replace(baseURL, "");
+        }
+        const scrollPanel = $("#postsScrollPanel");
+        const scrollPosition = scrollPanel.scrollTop();
+    
+        await Posts_API.addLike(post);
+        if (!Posts_API.error) {
+            await showPosts();
+            // Restore the scroll position after rendering posts
+        } else {
+            showError("Une erreur est survenue! ", Posts_API.currentHttpError);
+        }
+        scrollPanel.scrollTop(scrollPosition);
+
 });
 
 async function compileCategories() {
