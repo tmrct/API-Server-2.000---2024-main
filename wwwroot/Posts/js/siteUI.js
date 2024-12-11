@@ -927,32 +927,54 @@ async function renderUserManagement() {
               `);
       } else if (userIsSuper) {
         $("#" + userId + "div").append(`
-              <span id="promoteToAdmin" userId="${userId} title="Promouvoir le super usager à un usager administrateur" style="cursor:pointer; margin-left:2%;"> <i title="Promouvoir le super usager à un usager administrateur" class="fa-solid fa-user-graduate fa-lg"></i> </span>
-              <span id="deleteUser" userId="${userId} title="Supprimer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Supprimer l'usager" class="fa-solid fa-trash fa-lg"></i></span>
+              <span id="${userId}" class="promoteToAdmin" title="Promouvoir le super usager à un usager administrateur" style="cursor:pointer; margin-left:2%;"> <i title="Promouvoir le super usager à un usager administrateur" class="fa-solid fa-user-graduate fa-lg"></i> </span>
+              <span id="${userId}" class="deleteUser" title="Supprimer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Supprimer l'usager" class="fa-solid fa-trash fa-lg"></i></span>
               `);
       } else {
         $("#" + userId + "div").append(`
-              <span id="promoteToSuper"  userId="${userId} title="Promouvoir l'usager ordinaire à un super usager" style="cursor:pointer; margin-left:2%;"> <i title="Promouvoir l'usager ordinaire à un super usager" class="fa-solid fa-user fa-lg"></i></span>
-              <span id="deleteUser" userId="${userId}" title="Supprimer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Supprimer l'usager" class="fa-solid fa-trash fa-lg"></i></span>
+              <span id="${userId}" class="promoteToSuper"  userId="${userId}" title="Promouvoir l'usager ordinaire à un super usager" style="cursor:pointer; margin-left:2%;"> <i title="Promouvoir l'usager ordinaire à un super usager" class="fa-solid fa-user fa-lg"></i></span>
+              <span id="${userId}" class="deleteUser" title="Supprimer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Supprimer l'usager" class="fa-solid fa-trash fa-lg"></i></span>
               `);
       }
       if (userIsBlocked) {
         $("#" + userId + "div").append(`
-              <span id="unblock" userId="${userId} title="Débloquer l'usager" style="cursor:pointer; margin-left:2%;"> <i  title="Débloquer l'usager" class="fa-solid fa-lock-open fa-lg"></i> </span>
+              <span id="${userId}" class="unblock" title="Débloquer l'usager" style="cursor:pointer; margin-left:2%;"> <i  title="Débloquer l'usager" class="fa-solid fa-lock-open fa-lg"></i> </span>
               `);
       } else {
         $("#" + userId + "div").append(`
-              <span id="block" userId="${userId} title="Bloquer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Bloquer l'usager" class="fa-solid fa-user-lock fa-lg"></i> </span>
+              <span id="${userId}" class="block" title="Bloquer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Bloquer l'usager" class="fa-solid fa-user-lock fa-lg"></i> </span>
               `);
       }
       $("#form").append(`
           </div>
           </br>
           `);
-
-          $("#block").click()
     }
   }
+  $(".block").on("click", function () {
+    let userId = this.id;
+    console.log("Block user:", userId);
+  });
+  $(".unblock").on("click", function () {
+    let userId = this.id;
+    console.log("unblock user:", userId);
+  });
+  $(".promoteToSuper").on("click", function () {
+    let userId = this.id;
+    console.log("Promote to super user:", userId);
+  });
+  $(".promoteToAdmin").on("click", function () {
+    let userId = this.id;
+    console.log("Promote to admin user:", userId);
+  });
+  $(".demote").on("click", function () {
+    let userId = this.id;
+    console.log("Demote to normal user:", userId);
+  });
+  $(".deleteUser").on("click", function () {
+    let userId = this.id;
+    console.log("Delete user:", userId);
+  });
 }
 function renderAccountForm(account = null) {
   let create = account == null;
