@@ -160,6 +160,13 @@ class Accounts_API {
         headers: { Authorization: `Bearer ${accessToken}` },
         data: JSON.stringify(data),
         complete: (data) => {
+          if(!create){
+            sessionStorage.setItem(
+              "user",
+              JSON.stringify(data.responseJSON)
+            );
+          }
+
           resolve(data);
         },
         error: (xhr) => {
