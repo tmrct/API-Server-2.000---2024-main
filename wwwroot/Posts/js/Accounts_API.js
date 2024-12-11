@@ -150,13 +150,15 @@ class Accounts_API {
       });
     });
   }
-  static async delete() {
+  static async Delete() {
     this.initHttpState();
     return new Promise((resolve) => {
+      const accessToken = sessionStorage.getItem("access_token");
       const userJson = sessionStorage.getItem("user");
       const user = userJson ? JSON.parse(userJson) : null;
       $.ajax({
-        method: "POST",
+        method: "GET",
+        headers: { Authorization: `Bearer ${accessToken}` },
         contentType: "application/json",
         url: `${this.Host_URL()}/accounts/remove/${user.Id}`,
         data: { userId: user.Id },

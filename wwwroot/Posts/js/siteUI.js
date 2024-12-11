@@ -293,28 +293,6 @@ function renderVerificationForm() {
   });
 }
 
-function renderDeleteAccountConfirmation() {
-  $("#form").show();
-  $("#form").empty();
-  $("#form").append(`
-        <form class="form" id="deleteAccountForm">
-            <br/>
-            <div style="font-size:35px; font-family:bold;"> Voulez-vous vraiment effacer votre compte? </div>
-            <br/>
-            <button id="confirmDeleteAccount" class="btn" style="width:100%; background-color:red; color:white;"> Effacer mon compte </button>
-            <br/>
-            <br/>
-            <button id="cancelDeletion" class="btn btn-secondary" style="width:100%;"> Annuler </button>
-        </form>
-        `);
-  $("#confirmDeleteAccount").click(function () {
-    Accounts_API.Delete();
-  });
-  $("#cancelDeletion").click(function () {
-    showModifyAccountForm();
-  });
-}
-
 function renderPost(post, loggedUser = null) {
   let date = convertToFrenchDate(UTC_To_Local(post.Date));
   let crudIcon = "";
@@ -1022,6 +1000,37 @@ function renderAccountForm(account = null) {
   });
   $("#cancel").on("click", async function () {
     await showPosts();
+  });
+}
+
+function renderDeleteAccountConfirmation() {
+  $("#form").show();
+  $("#form").empty();
+  $("#form").append(`
+        <form class="form" id="deleteAccountForm">
+            <br/>
+            <div style="font-size:35px; font-family:bold; padding-left:75px;"> Voulez-vous vraiment effacer votre compte? </div>
+            <br/>
+            <button id="confirmDeleteAccount" class="btn" style="width:100%; background-color:#a90404; color:white;"> Effacer mon compte </button>
+            <br/>
+            <br/>
+            <button id="cancelDeletion" class="btn btn-secondary" style="width:100%;"> Annuler </button>
+        </form>
+        `);
+  $("#confirmDeleteAccount").click( async function () {
+    let currentUserId = getLoggedUser().Id;
+    let posts = await Posts_API.Get();
+    posts = posts.data;
+    for (const post of posts){
+      if(post.UserId == currentUserId){
+        await Posts_API.Delete(post.Id);
+      }
+    }
+    // await Accounts_API.Delete();
+  });
+
+  $("#cancelDeletion").click(function () {
+    showModifyAccountForm();
   });
 }
 
