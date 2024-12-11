@@ -44,8 +44,7 @@ async function Init_UI() {
   $("#manageUsersCmd").on("click", function () {
     showUserManagement();
   });
-  
-  
+
   installKeywordsOnkeyupEvent();
   await showPosts();
   start_Periodic_Refresh();
@@ -114,15 +113,15 @@ function intialView() {
 }
 
 async function showPosts(reset = false) {
-        intialView();
-        $("#viewTitle").text("Fil de nouvelles");
-        periodic_Refresh_paused = false;
-        await postsPanel.show(reset);
+  intialView();
+  $("#viewTitle").text("Fil de nouvelles");
+  periodic_Refresh_paused = false;
+  await postsPanel.show(reset);
 }
 
 async function showVerificationForm() {
-    $("#viewTitle").text("Vérification de compte");
-    periodic_Refresh_paused = true;
+  $("#viewTitle").text("Vérification de compte");
+  periodic_Refresh_paused = true;
 
   renderVerificationForm();
 }
@@ -175,12 +174,12 @@ function showDeletePostForm(id) {
   $("#viewTitle").text("Retrait");
   renderDeletePostForm(id);
 }
-function showDeletionConfirmation(){
-    showForm();
-    $("#commit").hide();
-    $("#abort").hide();  
-    $("#viewTitle").text("Supprimer compte");
-    renderDeleteAccountConfirmation();  
+function showDeletionConfirmation() {
+  showForm();
+  $("#commit").hide();
+  $("#abort").hide();
+  $("#viewTitle").text("Supprimer compte");
+  renderDeleteAccountConfirmation();
 }
 function showAbout() {
   hidePosts();
@@ -192,7 +191,12 @@ function showAbout() {
 }
 function getLoggedUser() {
   const userJson = sessionStorage.getItem("user");
-  if (userJson === undefined || userJson === null || userJson == "undefined" || userJson == 'undefined') {
+  if (
+    userJson === undefined ||
+    userJson === null ||
+    userJson == "undefined" ||
+    userJson == "undefined"
+  ) {
     return null;
   }
   return JSON.parse(userJson); // Parse JSON string to object
@@ -225,48 +229,48 @@ function start_Periodic_Refresh() {
   }, periodicRefreshPeriod * 1000);
 }
 async function renderPosts(queryString) {
-    let loggedUser = getLoggedUser();
-    if (loggedUser == null || loggedUser.VerifyCode == "verified") {
-        let endOfData = false;
-        queryString += "&sort=date,desc";
-        compileCategories();
-        if (selectedCategory != "") queryString += "&category=" + selectedCategory;
-        if (showKeywords) {
-            let keys = $("#searchKeys").val().replace(/[ ]/g, ',');
-            if (keys !== "")
-                queryString += "&keywords=" + $("#searchKeys").val().replace(/[ ]/g, ',')
-        }
-        addWaitingGif();
-        let response = await Posts_API.Get(queryString);
-        //let user = await Posts_API.GetLoggedInUser();
-        if (!Posts_API.error) {
-            currentETag = response.ETag;
-            currentPostsCount = parseInt(currentETag.split("-")[0]);
-            let Posts = response.data;
-            if (Posts.length > 0) {
-                Posts.forEach(Post => {
-                    postsPanel.append(renderPost(Post, getLoggedUser()));
-                });
-            } else
-                endOfData = true;
-            linefeeds_to_Html_br(".postText");
-            highlightKeywords();
-            attach_Posts_UI_Events_Callback();
-        } else {
-            showError(Posts_API.currentHttpError);
-        }
-        removeWaitingGif();
-        return endOfData;
-    } else {
-        showVerificationForm();
+  let loggedUser = getLoggedUser();
+  if (loggedUser == null || loggedUser.VerifyCode == "verified") {
+    let endOfData = false;
+    queryString += "&sort=date,desc";
+    compileCategories();
+    if (selectedCategory != "") queryString += "&category=" + selectedCategory;
+    if (showKeywords) {
+      let keys = $("#searchKeys").val().replace(/[ ]/g, ",");
+      if (keys !== "")
+        queryString +=
+          "&keywords=" + $("#searchKeys").val().replace(/[ ]/g, ",");
     }
+    addWaitingGif();
+    let response = await Posts_API.Get(queryString);
+    //let user = await Posts_API.GetLoggedInUser();
+    if (!Posts_API.error) {
+      currentETag = response.ETag;
+      currentPostsCount = parseInt(currentETag.split("-")[0]);
+      let Posts = response.data;
+      if (Posts.length > 0) {
+        Posts.forEach((Post) => {
+          postsPanel.append(renderPost(Post, getLoggedUser()));
+        });
+      } else endOfData = true;
+      linefeeds_to_Html_br(".postText");
+      highlightKeywords();
+      attach_Posts_UI_Events_Callback();
+    } else {
+      showError(Posts_API.currentHttpError);
+    }
+    removeWaitingGif();
+    return endOfData;
+  } else {
+    showVerificationForm();
+  }
 }
 function renderVerificationForm() {
-    $("#postsScrollPanel").hide();  
-    $("#form").show();
-    $("#abort").hide();
-    $("#form").empty();
-    $("#form").append(`
+  $("#postsScrollPanel").hide();
+  $("#form").show();
+  $("#abort").hide();
+  $("#form").empty();
+  $("#form").append(`
         <form class="form" id="verificationForm">
             <label for="VerificationCode" class="form-label">Code de vérification</label>
             <input 
@@ -382,26 +386,25 @@ $(document).on("click", ".like", async function () {
     likesArray.push(loggedUserId);
   }
 
-        post.data.Likes = {};
-        likesArray.forEach(userId => {
-            post.data.Likes[userId] = userId;
-        });
-        const baseURL = "http://localhost:5000/assetsRepository/";
-        if (post.data.Image.startsWith(baseURL)) {
-            post.data.Image = post.data.Image.replace(baseURL, "");
-        }
-        const scrollPanel = $("#postsScrollPanel");
-        const scrollPosition = scrollPanel.scrollTop();
-    
-        await Posts_API.addLike(post);
-        if (!Posts_API.error) {
-            await showPosts();
-            // Restore the scroll position after rendering posts
-        } else {
-            showError("Une erreur est survenue! ", Posts_API.currentHttpError);
-        }
-        scrollPanel.scrollTop(scrollPosition);
+  post.data.Likes = {};
+  likesArray.forEach((userId) => {
+    post.data.Likes[userId] = userId;
+  });
+  const baseURL = "http://localhost:5000/assetsRepository/";
+  if (post.data.Image.startsWith(baseURL)) {
+    post.data.Image = post.data.Image.replace(baseURL, "");
+  }
+  const scrollPanel = $("#postsScrollPanel");
+  const scrollPosition = scrollPanel.scrollTop();
 
+  await Posts_API.addLike(post);
+  if (!Posts_API.error) {
+    await showPosts();
+    // Restore the scroll position after rendering posts
+  } else {
+    showError("Une erreur est survenue! ", Posts_API.currentHttpError);
+  }
+  scrollPanel.scrollTop(scrollPosition);
 });
 
 async function compileCategories() {
@@ -461,7 +464,6 @@ function updateDropDownMenu() {
       $("#manageUsersCmd").on("click", function () {
         showUserManagement();
       });
-      
     }
   } else {
     // User is not logged in
@@ -817,6 +819,7 @@ function showModifyAccountForm() {
   renderAccountForm(getLoggedUser());
 }
 function showUserManagement() {
+  showForm();
   $("#commit").hide();
   $("#viewTitle").text("Gestion des usagers");
 
@@ -899,9 +902,34 @@ function renderLoginForm(justCreated = false) {
     await showPosts();
   });
 }
-function renderUserManagement(){
-  let allUsers = Accounts_API.Get();
-  console.log(allUsers);
+async function renderUserManagement() {
+  let allUsers = await Accounts_API.Index();
+  allUsers = allUsers.data.responseJSON;
+
+  $("#form").show();
+  $("#form").empty();
+
+  $("#form").append(`
+    <form class="userManagement" id="userManagement">
+    `);
+
+    for(const user of allUsers){
+      if(user.Id != getLoggedUser().Id){
+        console.log(user)
+        $("#form").append(`
+          <div style="margin-top:2%;">
+          <img class="avatar" style="width: 65px; height: 65px; border-radius: 50%; margin-left:2%;" src="${user.Avatar}"/>
+          <span style="margin-left:2%;"> ${user.Name} </span>
+          <span style="margin-left:2%;"> ${user.Email} </span>
+
+          </div>
+          </br>
+          `);
+      }
+    }
+  $("#form").append(`
+      </form>
+      `);
 }
 function renderAccountForm(account = null) {
   let create = account == null;
@@ -995,11 +1023,10 @@ function renderAccountForm(account = null) {
   $("#abortAccountForm").click(function () {
     showPosts();
   });
-  $("#deleteAccount").click(function (){
+  $("#deleteAccount").click(function () {
     showDeletionConfirmation();
   });
   addConflictValidation(Accounts_API.Conflict(), "Email", "createAccount");
-
 
   $("#accountForm").on("submit", async function (event) {
     event.preventDefault();
@@ -1037,13 +1064,12 @@ function renderDeleteAccountConfirmation() {
     let currentUserId = getLoggedUser().Id;
     let posts = await Posts_API.Get();
     posts = posts.data;
-    for (const post of posts){
-      if(post.UserId == currentUserId){
+    for (const post of posts) {
+      if (post.UserId == currentUserId) {
         Posts_API.Delete(post.Id);
-      }
-      else{
+      } else {
         let likes = post.Likes;
-        if(likes && likes[currentUserId]){
+        if (likes && likes[currentUserId]) {
           Posts_API.addLike(post);
         }
       }
