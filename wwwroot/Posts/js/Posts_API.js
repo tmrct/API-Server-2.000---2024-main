@@ -82,6 +82,9 @@ class Posts_API {
     static async addLike(post) {
         Posts_API.initHttpState();
         return new Promise(resolve => {
+            if(!post.data){
+                post = { data: { ...post } };
+            }
             let postId = post.data.Id;
             let updatedData = { ...post.data };
             $.ajax({
