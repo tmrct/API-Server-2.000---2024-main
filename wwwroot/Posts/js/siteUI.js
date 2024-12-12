@@ -940,26 +940,26 @@ async function renderUserManagement() {
           `);
       if (userIsAdmin) {
         $("#" + userId + "div").append(`
-              <span id="demote" userId="${userId}" title="Déproumouvoir l'usager administrateur à un usager ordinaire" style="cursor:pointer; margin-left:2%;"><i title="Déproumouvoir l'usager administrateur à un usager ordinaire" class="fa-solid fa-user-gear fa-lg"></i></span>
+              <span id="${userId}" class="promote" title="Déproumouvoir l'usager administrateur à un usager ordinaire" style="cursor:pointer; margin-left:2%;"><i class="fa-solid fa-user-gear fa-lg"></i></span>
               `);
       } else if (userIsSuper) {
         $("#" + userId + "div").append(`
-              <span id="${userId}" class="promoteToAdmin" title="Promouvoir le super usager à un usager administrateur" style="cursor:pointer; margin-left:2%;"> <i title="Promouvoir le super usager à un usager administrateur" class="fa-solid fa-user-graduate fa-lg"></i> </span>
+              <span id="${userId}" class="promote" title="Promouvoir le super usager à un usager administrateur" style="cursor:pointer; margin-left:2%;"> <i class="fa-solid fa-user-graduate fa-lg"></i> </span>
               <span id="${userId}" class="deleteUser" title="Supprimer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Supprimer l'usager" class="fa-solid fa-trash fa-lg"></i></span>
               `);
       } else {
         $("#" + userId + "div").append(`
-              <span id="${userId}" class="promoteToSuper"  userId="${userId}" title="Promouvoir l'usager ordinaire à un super usager" style="cursor:pointer; margin-left:2%;"> <i title="Promouvoir l'usager ordinaire à un super usager" class="fa-solid fa-user fa-lg"></i></span>
+              <span id="${userId}" class="promote"  userId="${userId}" title="Promouvoir l'usager ordinaire à un super usager" style="cursor:pointer; margin-left:2%;"> <i class="fa-solid fa-user fa-lg"></i></span>
               <span id="${userId}" class="deleteUser" title="Supprimer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Supprimer l'usager" class="fa-solid fa-trash fa-lg"></i></span>
               `);
       }
       if (userIsBlocked) {
         $("#" + userId + "div").append(`
-              <span id="${userId}" class="block" title="Débloquer l'usager" style="cursor:pointer; margin-left:2%;"> <i  title="Débloquer l'usager" class="fa-solid fa-lock-open fa-lg"></i> </span>
+              <span id="${userId}" class="block" title="Débloquer l'usager" style="cursor:pointer; margin-left:2%;"> <i class="fa-solid fa-lock-open fa-lg"></i> </span>
               `);
       } else {
         $("#" + userId + "div").append(`
-              <span id="${userId}" class="block" title="Bloquer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Bloquer l'usager" class="fa-solid fa-user-lock fa-lg"></i> </span>
+              <span id="${userId}" class="block" title="Bloquer l'usager" style="cursor:pointer; margin-left:2%;"> <i class="fa-solid fa-user-lock fa-lg"></i> </span>
               `);
       }
       $("#form").append(`
@@ -971,8 +971,8 @@ async function renderUserManagement() {
   $(".block").on("click", async function () {
     let userId = this.id;
     user = await Accounts_API.Index(userId)
-    user = user.data.responseJSON[0]
-    console.log(user);
+    user = user.data.responseJSON[0];
+    // console.log(user);
     await Accounts_API.Block(user)
     if($(this).attr("title") == "Bloquer l'usager"){
       $(this).attr("title", "Débloquer l'usager")
@@ -985,18 +985,32 @@ async function renderUserManagement() {
       $(this).children('i').addClass("fa-solid fa-user-lock fa-lg");
     }
   });
-  $(".promoteToSuper").on("click", function () {
+
+  $(".promote").on("click", async function () {
     let userId = this.id;
-    console.log("Promote to super user:", userId);
+    user = await Accounts_API.Index(userId)
+    user = user.data.responseJSON[0];
+    await Accounts_API.Promote(user)
+
+    if($(this).attr("title") == "Déproumouvoir l'usager administrateur à un usager ordinaire"){
+      $(this).attr("title", "Promouvoir l'usager ordinaire à un super usager")
+      $(this).children('i').removeClass();
+      $(this).children('i').addClass("fa-solid fa-user fa-lg");
+    }
+    else if ($(this).attr("title") == "Promouvoir le super usager à un usager administrateur"){
+      $(this).attr("title", "Déproumouvoir l'usager administrateur à un usager ordinaire")
+      $(this).children('i').removeClass();
+      $(this).children('i').addClass("fa-solid fa-user-gear fa-lg");
+    }
+    else{
+      $(this).attr("title", "Promouvoir le super usager à un usager administrateur")
+      $(this).children('i').removeClass();
+      $(this).children('i').addClass("fa-solid fa-user-graduate fa-lg");
+
+    }
+
   });
-  $(".promoteToAdmin").on("click", function () {
-    let userId = this.id;
-    console.log("Promote to admin user:", userId);
-  });
-  $(".demote").on("click", function () {
-    let userId = this.id;
-    console.log("Demote to normal user:", userId);
-  });
+
   $(".deleteUser").on("click", function () {
     let userId = this.id;
     console.log("Delete user:", userId);
@@ -1138,6 +1152,7 @@ function renderDeleteAccountConfirmation() {
     for (const post of posts) {
       if (post.UserId == currentUserId) {
         Posts_API.Delete(post.Id);
+        
       } else {
         let likes = post.Likes;
         if (likes && likes[currentUserId]) {

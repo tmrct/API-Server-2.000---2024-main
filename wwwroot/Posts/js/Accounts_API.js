@@ -102,6 +102,27 @@ class Accounts_API {
       });
     });
   }
+
+  static async Promote(user){
+    this.initHttpState();
+    return new Promise((resolve)=>{
+      const accessToken = sessionStorage.getItem("access_token");
+      $.ajax({
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        contentType: "application/json",
+        url: `${this.Host_URL()}/accounts/promote`,
+        data: JSON.stringify(user),
+        complete: (data)=>{
+          resolve({ data });
+        },
+        error: (xhr) => {
+          this.setHttpErrorState(xhr);
+          resolve(null);
+        }
+      });
+    });
+  }
   static async logout() {
     this.initHttpState();
     return new Promise((resolve) => {
