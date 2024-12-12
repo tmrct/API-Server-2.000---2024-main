@@ -973,13 +973,14 @@ async function renderUserManagement() {
     user = await Accounts_API.Index(userId)
     user = user.data.responseJSON[0]
     console.log(user);
-    // await Accounts_API.Block(user)
-    // console.log(user);
-    // console.log("Block user:", userId);
+    await Accounts_API.Block(user)
   });
   $(".unblock").on("click", async function () {
     let userId = this.id;
-    console.log("unblock user:", userId);
+    user = await Accounts_API.Index(userId)
+    user = user.data.responseJSON[0]
+    console.log(user);
+    await Accounts_API.Block(user)
   });
   $(".promoteToSuper").on("click", function () {
     let userId = this.id;
