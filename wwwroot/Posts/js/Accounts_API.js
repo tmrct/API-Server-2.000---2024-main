@@ -77,7 +77,7 @@ class Accounts_API {
     });
   }
   static async Login(loginInfo) {
-    this.initHttpState(); // Initialize error state tracking if needed
+    this.initHttpState();
     return new Promise((resolve) => {
       $.ajax({
         method: "POST",
@@ -99,6 +99,27 @@ class Accounts_API {
           this.setHttpErrorState(xhr);
           resolve(null);
         },
+      });
+    });
+  }
+
+  static async Promote(user){
+    this.initHttpState();
+    return new Promise((resolve)=>{
+      const accessToken = sessionStorage.getItem("access_token");
+      $.ajax({
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        contentType: "application/json",
+        url: `${this.Host_URL()}/accounts/promote`,
+        data: JSON.stringify(user),
+        complete: (data)=>{
+          resolve({ data });
+        },
+        error: (xhr) => {
+          this.setHttpErrorState(xhr);
+          resolve(null);
+        }
       });
     });
   }
@@ -124,7 +145,6 @@ class Accounts_API {
           },
         });
       } else {
-        // Handle case where user is not found in sessionStorage
         sessionStorage.removeItem("access_token");
         sessionStorage.removeItem("user");
         location.reload();
@@ -146,7 +166,7 @@ class Accounts_API {
           headers: { Authorization: `Bearer ${accessToken}` },
           complete: (data) => {
             if (data.responseJSON) {
-              sessionStorage.setItem("user", JSON.stringify(data.responseJSON)); // Update user in sessionStorage
+              sessionStorage.setItem("user", JSON.stringify(data.responseJSON));
             }
             resolve({ data });
           },
@@ -156,7 +176,6 @@ class Accounts_API {
           },
         });
       } else {
-        // Handle case where access token or user is not found in sessionStorage
         resolve(null);
       }
     });
@@ -197,6 +216,24 @@ class Accounts_API {
     });
   }
   static async Block(user){
+    this.initHttpState();
+    return new Promise((resolve) => {
+      const accessToken = sessionStorage.getItem("access_token");
+      $.ajax({
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        contentType: "application/json",
+        url: `${this.Host_URL()}/accounts/block`,
+        data : JSON.stringify(user),
+        complete: (data)=>{
+          resolve({ data });
+        },
+        error: (xhr) => {
+          this.setHttpErrorState(xhr);
+          resolve(null);
+        }
+      });
+    });
 
   }
   static async Delete() {
@@ -211,6 +248,28 @@ class Accounts_API {
         contentType: "application/json",
         url: `${this.Host_URL()}/accounts/remove/${user.Id}`,
         data: { userId: user.Id },
+        complete: (data) => {
+          sessionStorage.removeItem("access_token");
+          sessionStorage.removeItem("user");
+          resolve({ data });
+        },
+        error: (xhr) => {
+          this.setHttpErrorState(xhr);
+          resolve(null);
+        },
+      });
+    });
+  }
+  static async DeleteAsAdmin(userId) {
+    this.initHttpState();
+    return new Promise((resolve) => {
+      const accessToken = sessionStorage.getItem("access_token");
+      $.ajax({
+        method: "GET",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        contentType: "application/json",
+        url: `${this.Host_URL()}/accounts/remove/${userId}`,
+        data: { userId: userId },
         complete: (data) => {
           sessionStorage.removeItem("access_token");
           sessionStorage.removeItem("user");
