@@ -49,8 +49,8 @@ async function Init_UI() {
   installKeywordsOnkeyupEvent();
   await showPosts();
   start_Periodic_Refresh();
-  if (getLoggedUser()) {
-    initTimeout(3, Accounts_API.logout.bind(Accounts_API));
+    if(getLoggedUser()){
+        initTimeout(60, Accounts_API.logout.bind(Accounts_API));
 
     $(document).on('mousemove keydown click', function () {
       timeout();
@@ -250,9 +250,10 @@ async function renderPosts(queryString) {
       currentPostsCount = parseInt(currentETag.split("-")[0]);
       let Posts = response.data;
       if (Posts.length > 0) {
-        Posts.forEach((Post) => {
-          postsPanel.append(renderPost(Post, getLoggedUser()));
-        });
+        for (const post of Posts) {
+          const postElement = await renderPost(post, loggedUser);
+          postsPanel.append(postElement);
+      }
       } else endOfData = true;
       linefeeds_to_Html_br(".postText");
       highlightKeywords();
@@ -303,11 +304,25 @@ function renderVerificationForm() {
   });
 }
 
-function renderPost(post, loggedUser = null) {
+async function renderPost(post, loggedUser = null) {
+  console.log(post);
   let date = convertToFrenchDate(UTC_To_Local(post.Date));
   let crudIcon = "";
   let likesCount = post.Likes ? Object.keys(post.Likes).length : 0;
 
+  let userListOfLikes = Object.values(post.Likes);
+  let userListOfLikesNames = [];
+
+  let theAvatar = await Accounts_API.GetAvatar(post.UserId);
+  let avatar = theAvatar.data.responseJSON.Avatar;
+
+  for (let i = 0; i < userListOfLikes.length; i++) {
+    let user = await Accounts_API.GetAvatar(userListOfLikes[i]);
+    if(user){
+      userJSON = user.data.responseJSON;
+      userListOfLikesNames.push(userJSON.Name);
+    }
+  }
   let likedByUser = false;
   if (loggedUser && post.Likes) {
     likedByUser = Object.values(post.Likes).includes(loggedUser.Id);
@@ -323,7 +338,7 @@ function renderPost(post, loggedUser = null) {
             <span></span>
             <span></span>
             <span class="${likeIconClass} cmdIconSmall" postId="${post.Id}" title="Aimer la nouvelle"></span>
-            <span class="likesCount">${likesCount}</span>
+            <span class="likesCount" title='${userListOfLikesNames.join('&#013;')}'>${likesCount}</span>
             `;
     if (loggedUser.isSuper) {
       $("#createPost").show();
@@ -357,7 +372,15 @@ function renderPost(post, loggedUser = null) {
             </div>
             <div class="postTitle"> ${post.Title} </div>
             <img class="postImage" src='${post.Image}'/>
-            <div class="postDate"> ${date} </div>
+              <div style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+              ">
+              <img class="avatar" style="width: 35px; height: 35px; border-radius: 50%;" src='${avatar}'/>
+              <div class="postDate" style="font-size: 14px; color: #666;"> ${date} </div>
+            </div>
             <div postId="${post.Id}" class="postTextContainer hideExtra">
                 <div class="postText" >${post.Text}</div>
             </div>
@@ -376,6 +399,11 @@ $(document).on("click", ".like", async function () {
 
   let likesArray = Object.values(post.data.Likes);
 
+  // const baseURL = "http://localhost:5000/assetsRepository/";
+  // if (post.data.Image.startsWith(baseURL)) {
+  //   post.data.Image = post.data.Image.replace(baseURL, "");
+  // }
+
   if (likesArray.includes(loggedUserId)) {
     likesArray = likesArray.filter((userId) => userId !== loggedUserId);
   } else {
@@ -386,12 +414,6 @@ $(document).on("click", ".like", async function () {
   likesArray.forEach((userId) => {
     post.data.Likes[userId] = userId;
   });
-  const baseURL = "http://localhost:5000/assetsRepository/";
-  if (post.data.Image.startsWith(baseURL)) {
-    post.data.Image = post.data.Image.replace(baseURL, "");
-  }
-  const scrollPanel = $("#postsScrollPanel");
-  const scrollPosition = scrollPanel.scrollTop();
 
   await Posts_API.addLike(post);
   if (!Posts_API.error) {
@@ -399,7 +421,6 @@ $(document).on("click", ".like", async function () {
   } else {
     showError("Une erreur est survenue! ", Posts_API.currentHttpError);
   }
-  scrollPanel.scrollTop(scrollPosition);
 });
 
 async function compileCategories() {
@@ -940,9 +961,10 @@ function renderLoginForm(justCreated = false) {
       showError("Une erreur est survenue! ", Accounts_API.currentHttpError);
     }
 
-    initTimeout(3, Accounts_API.logout.bind(Accounts_API));
-    $(document).on('mousemove keydown click', function () {
-      timeout();
+    initTimeout(60, Accounts_API.logout.bind(Accounts_API));
+
+    $(document).on('mousemove keydown click', function() {
+        timeout();
     });
   });
 
@@ -1180,6 +1202,7 @@ function renderDeleteAccountConfirmation() {
     event.preventDefault();
     let currentUserId = getLoggedUser().Id;
     let posts = await Posts_API.Get();
+    console.log(posts);
     posts = posts.data;
     for (const post of posts) {
       if (post.UserId == currentUserId) {
