@@ -955,7 +955,7 @@ async function renderUserManagement() {
       }
       if (userIsBlocked) {
         $("#" + userId + "div").append(`
-              <span id="${userId}" class="unblock" title="Débloquer l'usager" style="cursor:pointer; margin-left:2%;"> <i  title="Débloquer l'usager" class="fa-solid fa-lock-open fa-lg"></i> </span>
+              <span id="${userId}" class="block" title="Débloquer l'usager" style="cursor:pointer; margin-left:2%;"> <i  title="Débloquer l'usager" class="fa-solid fa-lock-open fa-lg"></i> </span>
               `);
       } else {
         $("#" + userId + "div").append(`
@@ -974,13 +974,16 @@ async function renderUserManagement() {
     user = user.data.responseJSON[0]
     console.log(user);
     await Accounts_API.Block(user)
-  });
-  $(".unblock").on("click", async function () {
-    let userId = this.id;
-    user = await Accounts_API.Index(userId)
-    user = user.data.responseJSON[0]
-    console.log(user);
-    await Accounts_API.Block(user)
+    if($(this).attr("title") == "Bloquer l'usager"){
+      $(this).attr("title", "Débloquer l'usager")
+      $(this).children('i').removeClass();
+      $(this).children('i').addClass("fa-solid fa-lock-open fa-lg");
+    }
+    else{
+      $(this).attr("title", "Bloquer l'usager")
+      $(this).children('i').removeClass();
+      $(this).children('i').addClass("fa-solid fa-user-lock fa-lg");
+    }
   });
   $(".promoteToSuper").on("click", function () {
     let userId = this.id;
