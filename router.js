@@ -142,4 +142,21 @@ export const PUT_EndPoint = function (HttpContext) {
     return false;
 };
 
+export const ACCOUNTS_EndPoint = function (HttpContext) {
+    if (HttpContext.req.url.startsWith('/accounts/getAvatar') && HttpContext.req.method == "GET") {
+        try {
+            let accountsController = new AccountsController(HttpContext);
+            accountsController.getAvatar(HttpContext.path.params.id);
+            return true;
+        } catch (error) {
+            console.log("Accounts_EndPoint Error message: \n", error.message);
+            console.log("Stack: \n", error.stack);
+            HttpContext.response.notFound();
+            return true;
+        }
+    }
+    // request not consumed
+    // must be handled by another middleware
+    return false;
+}
 

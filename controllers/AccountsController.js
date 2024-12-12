@@ -36,6 +36,14 @@ export default class AccountsController extends Controller {
       else this.HttpContext.response.unAuthorized("Unauthorized access");
     }
   }
+  getAvatar(id) {
+    if (id != '') {
+        this.HttpContext.response.JSON(this.repository.get(id));
+
+    } else {
+        this.HttpContext.response.badRequest("ID is missing.");
+    }
+}
 
   // POST: /token body payload[{"Email": "...", "Password": "..."}]
   login(loginInfo) {
