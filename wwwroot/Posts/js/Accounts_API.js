@@ -65,7 +65,7 @@ class Accounts_API {
         contentType: "application/json",
         url: this.Host_URL() + "/accounts/getAvatar",
         headers: { Authorization: `Bearer ${accessToken}` },
-        data: {id: JSON.stringify(id)},
+        data: {id: id},
         complete: (data) => {
           resolve({data});
         },

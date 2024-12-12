@@ -10,6 +10,9 @@ export default class PostModelsController extends Controller {
     addLike(data, id) {
         if (AccessControl.writeGranted(this.HttpContext.authorizations, this.requiredAuthorizations)) {
             if (id !== '') {
+                if (data.Image) {
+                    data.Image = data.Image.replace("http://localhost:5000/assetsRepository/", "");
+                }
                 data = this.repository.update(id, data, false);
                 if (this.repository.model.state.isValid) {
                     this.HttpContext.response.accepted(data);
