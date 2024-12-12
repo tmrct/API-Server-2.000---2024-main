@@ -262,4 +262,26 @@ class Accounts_API {
       });
     });
   }
+  static async DeleteAsAdmin(userId) {
+    this.initHttpState();
+    return new Promise((resolve) => {
+      const accessToken = sessionStorage.getItem("access_token");
+      $.ajax({
+        method: "GET",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        contentType: "application/json",
+        url: `${this.Host_URL()}/accounts/remove/${userId}`,
+        data: { userId: userId },
+        complete: (data) => {
+          sessionStorage.removeItem("access_token");
+          sessionStorage.removeItem("user");
+          resolve({ data });
+        },
+        error: (xhr) => {
+          this.setHttpErrorState(xhr);
+          resolve(null);
+        },
+      });
+    });
+  }
 }

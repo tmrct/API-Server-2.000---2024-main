@@ -184,13 +184,6 @@ function showDeletePostForm(id) {
   $("#viewTitle").text("Retrait");
   renderDeletePostForm(id);
 }
-function showDeletionConfirmation() {
-  showForm();
-  $("#commit").hide();
-  $("#abort").hide();
-  $("#viewTitle").text("Supprimer compte");
-  renderDeleteAccountConfirmation();
-}
 function showAbout() {
   hidePosts();
   $("#hiddenIcon").show();
@@ -840,6 +833,57 @@ function showLoginAccountForm() {
   $("#viewTitle").text("Connexion");
   renderLoginForm();
 }
+function showAccountDeletionConfirmationAsAdmin(user){
+  showForm();
+  $("#commit").hide();
+  $("#abort").hide();
+  $("#viewTitle").text("Suppresion de ce compte");
+  renderAdminConfirmation(user);
+}
+function showDeletionConfirmation() {
+  showForm();
+  $("#commit").hide();
+  $("#abort").hide();
+  $("#viewTitle").text("Supprimer compte");
+  renderDeleteAccountConfirmation();
+}
+function renderAdminConfirmation(user){
+    $("#form").show();
+    $("#form").empty();
+    $("#form").append(`
+          <form class="form" id="deleteAccountForm">
+              <br/>
+              <div style="font-size:35px; font-family:bold; padding-left:75px;"> Voulez-vous vraiment effacer le compte de ${user.Name}? </div>
+              <br/>
+              <button id="confirmDeleteAccount" class="btn" style="width:100%; background-color:#a90404; color:white;"> Effacer ce compte </button>
+              <br/>
+              <br/>
+              <button id="cancelDeletion" class="btn btn-secondary" style="width:100%;"> Annuler </button>
+          </form>
+          `);
+    $("#confirmDeleteAccount").click(async function (event) {
+      event.preventDefault();
+      let userId = user.Id;
+      let posts = await Posts_API.Get();
+      posts = posts.data;
+      for (const post of posts) {
+        if (post.UserId == userId) {
+          Posts_API.Delete(post.Id);
+          
+        } else {
+          let likes = post.Likes;
+          if (likes && likes[userId]) {
+            Posts_API.addLike(post);
+          }
+        }
+      }
+      Accounts_API.DeleteAsAdmin(userId);
+      showPosts();
+    });
+    $("#cancelDeletion").click(function () {
+      showUserManagement();
+    });
+}
 
 function renderLoginForm(justCreated = false) {
   $("#commit").hide();
@@ -941,6 +985,7 @@ async function renderUserManagement() {
       if (userIsAdmin) {
         $("#" + userId + "div").append(`
               <span id="${userId}" class="promote" title="Déproumouvoir l'usager administrateur à un usager ordinaire" style="cursor:pointer; margin-left:2%;"><i class="fa-solid fa-user-gear fa-lg"></i></span>
+              <span id="${userId}" class="deleteUser" title="Supprimer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Supprimer l'usager" class="fa-solid fa-trash fa-lg"></i></span>
               `);
       } else if (userIsSuper) {
         $("#" + userId + "div").append(`
@@ -972,7 +1017,6 @@ async function renderUserManagement() {
     let userId = this.id;
     user = await Accounts_API.Index(userId)
     user = user.data.responseJSON[0];
-    // console.log(user);
     await Accounts_API.Block(user)
     if($(this).attr("title") == "Bloquer l'usager"){
       $(this).attr("title", "Débloquer l'usager")
@@ -1006,15 +1050,17 @@ async function renderUserManagement() {
       $(this).attr("title", "Promouvoir le super usager à un usager administrateur")
       $(this).children('i').removeClass();
       $(this).children('i').addClass("fa-solid fa-user-graduate fa-lg");
-
     }
 
   });
 
-  $(".deleteUser").on("click", function () {
+  $(".deleteUser").on("click", async function () {
     let userId = this.id;
-    console.log("Delete user:", userId);
-  });
+    user = await Accounts_API.Index(userId)
+    user = user.data.responseJSON[0];
+
+    showAccountDeletionConfirmationAsAdmin(user)
+    });
 }
 function renderAccountForm(account = null) {
   let create = account == null;

@@ -290,6 +290,5 @@ export default class AccountsController extends Controller {
         "You are not authorized to remove this user."
       );
     }
-    //doit reset la cache ou whatever quand l'usager est deleted
   }
 }
