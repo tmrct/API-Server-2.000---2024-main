@@ -825,7 +825,6 @@ function showUserManagement() {
   showForm();
   $("#commit").hide();
   $("#viewTitle").text("Gestion des usagers");
-
   renderUserManagement();
 }
 function showLoginAccountForm() {
