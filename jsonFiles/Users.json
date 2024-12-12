@@ -78,18 +78,5 @@
             "writeAccess": 1
         },
         "Id": "f0385210-b7f8-11ef-bce6-53a0bc5779d1"
-    },
-    {
-        "Created": 1733992449,
-        "Email": "Stephane.Chasse@clg.qc.ca",
-        "Password": "password",
-        "Name": "steph",
-        "Avatar": "f2555520-b839-11ef-9ddf-ef2365416d22.png",
-        "VerifyCode": "verified",
-        "Authorizations": {
-            "readAccess": 1,
-            "writeAccess": 1
-        },
-        "Id": "f253a770-b839-11ef-9ddf-ef2365416d22"
     }
 ]
