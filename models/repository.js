@@ -134,8 +134,9 @@ export default class Repository {
             if (index > -1) {
                 this.checkConflict(objectToModify);
                 if (!this.model.state.inConflict) {
-                    if (handleAssets)
+                    if (handleAssets){
                         this.model.handleAssets(objectToModify, this.objectsList[index]);
+                    }
                     this.objectsList[index] = objectToModify;
                     this.write();
                 }
