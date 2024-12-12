@@ -77,7 +77,7 @@ class Accounts_API {
     });
   }
   static async Login(loginInfo) {
-    this.initHttpState(); // Initialize error state tracking if needed
+    this.initHttpState();
     return new Promise((resolve) => {
       $.ajax({
         method: "POST",
@@ -145,7 +145,6 @@ class Accounts_API {
           },
         });
       } else {
-        // Handle case where user is not found in sessionStorage
         sessionStorage.removeItem("access_token");
         sessionStorage.removeItem("user");
         location.reload();
@@ -167,7 +166,7 @@ class Accounts_API {
           headers: { Authorization: `Bearer ${accessToken}` },
           complete: (data) => {
             if (data.responseJSON) {
-              sessionStorage.setItem("user", JSON.stringify(data.responseJSON)); // Update user in sessionStorage
+              sessionStorage.setItem("user", JSON.stringify(data.responseJSON));
             }
             resolve({ data });
           },
@@ -177,7 +176,6 @@ class Accounts_API {
           },
         });
       } else {
-        // Handle case where access token or user is not found in sessionStorage
         resolve(null);
       }
     });
