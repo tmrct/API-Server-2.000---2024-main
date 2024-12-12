@@ -52,12 +52,11 @@ async function Init_UI() {
     if(getLoggedUser()){
         initTimeout(60, Accounts_API.logout.bind(Accounts_API));
 
-        // Reset the countdown whenever the user interacts with the page
-        $(document).on('mousemove keydown click', function() {
-            timeout();
-        });
-    }
-    console.log("Page is being refreshed or closed.");
+    $(document).on('mousemove keydown click', function () {
+      timeout();
+    });
+  }
+  console.log("Page is being refreshed or closed.");
 }
 
 /////////////////////////// Search keywords UI //////////////////////////////////////////////////////////
@@ -184,13 +183,6 @@ function showDeletePostForm(id) {
   $("#viewTitle").text("Retrait");
   renderDeletePostForm(id);
 }
-function showDeletionConfirmation() {
-  showForm();
-  $("#commit").hide();
-  $("#abort").hide();
-  $("#viewTitle").text("Supprimer compte");
-  renderDeleteAccountConfirmation();
-}
 function showAbout() {
   hidePosts();
   $("#hiddenIcon").show();
@@ -253,7 +245,6 @@ async function renderPosts(queryString) {
     }
     addWaitingGif();
     let response = await Posts_API.Get(queryString);
-    //let user = await Posts_API.GetLoggedInUser();
     if (!Posts_API.error) {
       currentETag = response.ETag;
       currentPostsCount = parseInt(currentETag.split("-")[0]);
@@ -332,15 +323,11 @@ async function renderPost(post, loggedUser = null) {
       userListOfLikesNames.push(userJSON.Name);
     }
   }
-
-
-  // Determine if loggedUser has liked the post
   let likedByUser = false;
   if (loggedUser && post.Likes) {
     likedByUser = Object.values(post.Likes).includes(loggedUser.Id);
   }
 
-  // Set the like icon based on whether the user has liked the post or not
   let likeIconClass = likedByUser
     ? " like fa-thumbs-up fa-solid"
     : "like fa-thumbs-up fa-regular";
@@ -358,7 +345,6 @@ async function renderPost(post, loggedUser = null) {
     }
     if (loggedUser.Id === post.UserId && loggedUser.isSuper) {
       $("#createPost").show();
-      // User can edit and delete their own posts
       crudIcon = `
             <span class="editCmd cmdIconSmall fa fa-pencil" postId="${post.Id}" title="Modifier nouvelle"></span>
             <span class="deleteCmd cmdIconSmall fa fa-trash" postId="${post.Id}" title="Effacer nouvelle"></span>
@@ -366,7 +352,6 @@ async function renderPost(post, loggedUser = null) {
             <span class="likesCount">${likesCount}</span>
             `;
     } else if (loggedUser.isAdmin) {
-      // Admin can only delete
       $("#createPost").hide();
       crudIcon = `
                 <span></span>
@@ -376,7 +361,6 @@ async function renderPost(post, loggedUser = null) {
             `;
     }
   } else {
-    // No icons for unauthorized users
     crudIcon = "";
   }
 
@@ -434,7 +418,6 @@ $(document).on("click", ".like", async function () {
   await Posts_API.addLike(post);
   if (!Posts_API.error) {
     await showPosts();
-    // Restore the scroll position after rendering posts
   } else {
     showError("Une erreur est survenue! ", Posts_API.currentHttpError);
   }
@@ -461,7 +444,6 @@ function updateDropDownMenu() {
   let selectClass = selectedCategory === "" ? "fa-check" : "fa-fw";
   DDMenu.empty();
   if (loggedUser) {
-    // User is logged in
     if (loggedUser.isSuper) {
       $("#createPost").show();
     }
@@ -499,7 +481,6 @@ function updateDropDownMenu() {
       });
     }
   } else {
-    // User is not logged in
     $("#createPost").hide();
     DDMenu.append(
       $(`
@@ -855,7 +836,6 @@ function showUserManagement() {
   showForm();
   $("#commit").hide();
   $("#viewTitle").text("Gestion des usagers");
-
   renderUserManagement();
 }
 function showLoginAccountForm() {
@@ -863,17 +843,68 @@ function showLoginAccountForm() {
   $("#viewTitle").text("Connexion");
   renderLoginForm();
 }
+function showAccountDeletionConfirmationAsAdmin(user) {
+  showForm();
+  $("#commit").hide();
+  $("#abort").hide();
+  $("#viewTitle").text("Suppresion de ce compte");
+  renderAdminConfirmation(user);
+}
+function showDeletionConfirmation() {
+  showForm();
+  $("#commit").hide();
+  $("#abort").hide();
+  $("#viewTitle").text("Supprimer compte");
+  renderDeleteAccountConfirmation();
+}
+function renderAdminConfirmation(user) {
+  $("#form").show();
+  $("#form").empty();
+  $("#form").append(`
+          <form class="form" id="deleteAccountForm">
+              <br/>
+              <div style="font-size:35px; font-family:bold; padding-left:75px;"> Voulez-vous vraiment effacer le compte de ${user.Name}? </div>
+              <br/>
+              <button id="confirmDeleteAccount" class="btn" style="width:100%; background-color:#a90404; color:white;"> Effacer ce compte </button>
+              <br/>
+              <br/>
+              <button id="cancelDeletion" class="btn btn-secondary" style="width:100%;"> Annuler </button>
+          </form>
+          `);
+  $("#confirmDeleteAccount").click(async function (event) {
+    event.preventDefault();
+    let userId = user.Id;
+    let posts = await Posts_API.Get();
+    posts = posts.data;
+    for (const post of posts) {
+      if (post.UserId == userId) {
+        Posts_API.Delete(post.Id);
+
+      } else {
+        let likes = post.Likes;
+        if (likes && likes[userId]) {
+          Posts_API.addLike(post);
+        }
+      }
+    }
+    Accounts_API.DeleteAsAdmin(userId);
+    showPosts();
+  });
+  $("#cancelDeletion").click(function (event) {
+    event.preventDefault();
+    showUserManagement();
+  });
+}
 
 function renderLoginForm(justCreated = false) {
   $("#commit").hide();
   $("#form").show();
   $("#form").empty();
   $("#form").append(`
-            ${
-              justCreated
-                ? '<div class="alert alert-info"><strong>Veuillez prendre vos courriel pour récupérer votre code de vérification</strong></div>'
-                : ""
-            }
+            ${justCreated
+      ? '<div class="alert alert-info"><strong>Veuillez prendre vos courriel pour récupérer votre code de vérification</strong></div>'
+      : ""
+    }
         <form class="form" id="loginForm">
             <label for="Email" class="form-label">Adresse de courriel </label>
             <input 
@@ -932,7 +963,6 @@ function renderLoginForm(justCreated = false) {
 
     initTimeout(60, Accounts_API.logout.bind(Accounts_API));
 
-    // Reset the countdown whenever the user interacts with the page
     $(document).on('mousemove keydown click', function() {
         timeout();
     });
@@ -963,26 +993,27 @@ async function renderUserManagement() {
           `);
       if (userIsAdmin) {
         $("#" + userId + "div").append(`
-              <span id="demote" userId="${userId}" title="Déproumouvoir l'usager administrateur à un usager ordinaire" style="cursor:pointer; margin-left:2%;"><i title="Déproumouvoir l'usager administrateur à un usager ordinaire" class="fa-solid fa-user-gear fa-lg"></i></span>
+              <span id="${userId}" class="promote" title="Déproumouvoir l'usager administrateur à un usager ordinaire" style="cursor:pointer; margin-left:2%;"><i class="fa-solid fa-user-gear fa-lg"></i></span>
+              <span id="${userId}" class="deleteUser" title="Supprimer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Supprimer l'usager" class="fa-solid fa-trash fa-lg"></i></span>
               `);
       } else if (userIsSuper) {
         $("#" + userId + "div").append(`
-              <span id="${userId}" class="promoteToAdmin" title="Promouvoir le super usager à un usager administrateur" style="cursor:pointer; margin-left:2%;"> <i title="Promouvoir le super usager à un usager administrateur" class="fa-solid fa-user-graduate fa-lg"></i> </span>
+              <span id="${userId}" class="promote" title="Promouvoir le super usager à un usager administrateur" style="cursor:pointer; margin-left:2%;"> <i class="fa-solid fa-user-graduate fa-lg"></i> </span>
               <span id="${userId}" class="deleteUser" title="Supprimer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Supprimer l'usager" class="fa-solid fa-trash fa-lg"></i></span>
               `);
       } else {
         $("#" + userId + "div").append(`
-              <span id="${userId}" class="promoteToSuper"  userId="${userId}" title="Promouvoir l'usager ordinaire à un super usager" style="cursor:pointer; margin-left:2%;"> <i title="Promouvoir l'usager ordinaire à un super usager" class="fa-solid fa-user fa-lg"></i></span>
+              <span id="${userId}" class="promote"  userId="${userId}" title="Promouvoir l'usager ordinaire à un super usager" style="cursor:pointer; margin-left:2%;"> <i class="fa-solid fa-user fa-lg"></i></span>
               <span id="${userId}" class="deleteUser" title="Supprimer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Supprimer l'usager" class="fa-solid fa-trash fa-lg"></i></span>
               `);
       }
       if (userIsBlocked) {
         $("#" + userId + "div").append(`
-              <span id="${userId}" class="unblock" title="Débloquer l'usager" style="cursor:pointer; margin-left:2%;"> <i  title="Débloquer l'usager" class="fa-solid fa-lock-open fa-lg"></i> </span>
+              <span id="${userId}" class="block" title="Débloquer l'usager" style="cursor:pointer; margin-left:2%;"> <i class="fa-solid fa-lock-open fa-lg"></i> </span>
               `);
       } else {
         $("#" + userId + "div").append(`
-              <span id="${userId}" class="block" title="Bloquer l'usager" style="cursor:pointer; margin-left:2%;"> <i title="Bloquer l'usager" class="fa-solid fa-user-lock fa-lg"></i> </span>
+              <span id="${userId}" class="block" title="Bloquer l'usager" style="cursor:pointer; margin-left:2%;"> <i class="fa-solid fa-user-lock fa-lg"></i> </span>
               `);
       }
       $("#form").append(`
@@ -994,31 +1025,50 @@ async function renderUserManagement() {
   $(".block").on("click", async function () {
     let userId = this.id;
     user = await Accounts_API.Index(userId)
-    user = user.data.responseJSON[0]
-    console.log(user);
-    // await Accounts_API.Block(user)
-    // console.log(user);
-    // console.log("Block user:", userId);
+    user = user.data.responseJSON[0];
+    await Accounts_API.Block(user)
+    if ($(this).attr("title") == "Bloquer l'usager") {
+      $(this).attr("title", "Débloquer l'usager")
+      $(this).children('i').removeClass();
+      $(this).children('i').addClass("fa-solid fa-lock-open fa-lg");
+    }
+    else {
+      $(this).attr("title", "Bloquer l'usager")
+      $(this).children('i').removeClass();
+      $(this).children('i').addClass("fa-solid fa-user-lock fa-lg");
+    }
   });
-  $(".unblock").on("click", async function () {
+
+  $(".promote").on("click", async function () {
     let userId = this.id;
-    console.log("unblock user:", userId);
+    user = await Accounts_API.Index(userId)
+    user = user.data.responseJSON[0];
+    await Accounts_API.Promote(user)
+
+    if ($(this).attr("title") == "Déproumouvoir l'usager administrateur à un usager ordinaire") {
+      $(this).attr("title", "Promouvoir l'usager ordinaire à un super usager")
+      $(this).children('i').removeClass();
+      $(this).children('i').addClass("fa-solid fa-user fa-lg");
+    }
+    else if ($(this).attr("title") == "Promouvoir le super usager à un usager administrateur") {
+      $(this).attr("title", "Déproumouvoir l'usager administrateur à un usager ordinaire")
+      $(this).children('i').removeClass();
+      $(this).children('i').addClass("fa-solid fa-user-gear fa-lg");
+    }
+    else {
+      $(this).attr("title", "Promouvoir le super usager à un usager administrateur")
+      $(this).children('i').removeClass();
+      $(this).children('i').addClass("fa-solid fa-user-graduate fa-lg");
+    }
+
   });
-  $(".promoteToSuper").on("click", function () {
+
+  $(".deleteUser").on("click", async function () {
     let userId = this.id;
-    console.log("Promote to super user:", userId);
-  });
-  $(".promoteToAdmin").on("click", function () {
-    let userId = this.id;
-    console.log("Promote to admin user:", userId);
-  });
-  $(".demote").on("click", function () {
-    let userId = this.id;
-    console.log("Demote to normal user:", userId);
-  });
-  $(".deleteUser").on("click", function () {
-    let userId = this.id;
-    console.log("Delete user:", userId);
+    user = await Accounts_API.Index(userId)
+    user = user.data.responseJSON[0];
+
+    showAccountDeletionConfirmationAsAdmin(user)
   });
 }
 function renderAccountForm(account = null) {
@@ -1029,9 +1079,8 @@ function renderAccountForm(account = null) {
   $("#form").append(`
         <form class="form" id="accountForm">
             <input type="hidden" name="Id" id="Id" value="${account.Id}"/>
-             <input type="hidden" name="Created" id="Created" value="${
-               account.Date
-             }"/>
+             <input type="hidden" name="Created" id="Created" value="${account.Date
+    }"/>
             <label for="Email" class="form-label">Adresse de courriel </label>
             <input 
                 class="form-control Email"
@@ -1158,6 +1207,7 @@ function renderDeleteAccountConfirmation() {
     for (const post of posts) {
       if (post.UserId == currentUserId) {
         Posts_API.Delete(post.Id);
+
       } else {
         let likes = post.Likes;
         if (likes && likes[currentUserId]) {

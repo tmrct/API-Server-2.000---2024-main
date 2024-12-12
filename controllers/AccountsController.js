@@ -51,13 +51,21 @@ export default class AccountsController extends Controller {
       if (this.repository != null) {
         let user = this.repository.findByField("Email", loginInfo.Email);
         if (user != null) {
-          if (user.Password == loginInfo.Password) {
-            user = this.repository.get(user.Id);
-            let newToken = TokenManager.create(user);
-            this.HttpContext.response.created(newToken);
-          } else {
-            this.HttpContext.response.wrongPassword("Wrong password.");
+          if (user.Authorizations.readAccess != -1 && user.Authorizations.writeAccess != -1){
+            if (user.Password == loginInfo.Password) {
+              user = this.repository.get(user.Id);
+              let newToken = TokenManager.create(user);
+              this.HttpContext.response.created(newToken);
+            } else {
+              this.HttpContext.response.wrongPassword("Wrong password.");
+            }
           }
+          else{
+            this.HttpContext.response.userNotFound(
+              "Compte bloqué par l'administrateur."
+            );
+          }
+
         } else
           this.HttpContext.response.userNotFound(
             "This user email is not found."
@@ -207,6 +215,7 @@ export default class AccountsController extends Controller {
       } else this.HttpContext.response.notImplemented();
     } else this.HttpContext.response.unAuthorized("Unauthorized access");
   }
+  
   // PUT:account/modify body payload[{"Id": 0, "Name": "...", "Email": "...", "Password": "..."}]
   modify(user) {
     // empty asset members imply no change and there values will be taken from the stored record
@@ -254,7 +263,6 @@ export default class AccountsController extends Controller {
 
   // GET:account/remove/id
   remove(id) {
-    // todo make sure that the requester has legitimity to delete either itself or if it's an admin
     if (
       AccessControl.writeGrantedAdminOrOwner(
         this.HttpContext,
@@ -262,25 +270,19 @@ export default class AccountsController extends Controller {
         id
       )
     ) {
-      //suppression de compte restant.
       let userToDelete = this.repository.findByField("Id", id);
       if (userToDelete) {
         this.repository.remove(userToDelete.Id);
       }
       if (this.repository.model.state.isValid) {
         this.HttpContext.response.accepted(
-          `User with ID ${id} has been successfully removed.`
+          `Usager avec  l'id ${id} retiré.`
         );
       } else {
-        // In case of failure in deletion
-        this.HttpContext.response.notFound("Failed to delete the user.");
+        this.HttpContext.response.notFound();
       }
     } else {
-      // If the requester does not have permission to delete
-      this.HttpContext.response.unAuthorized(
-        "You are not authorized to remove this user."
-      );
+      this.HttpContext.response.unAuthorized();
     }
-    //doit reset la cache ou whatever quand l'usager est deleted
   }
 }
