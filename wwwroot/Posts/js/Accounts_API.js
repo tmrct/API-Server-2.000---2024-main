@@ -57,6 +57,25 @@ class Accounts_API {
       });
     });
   }
+  static async GetAvatar(id){
+    return new Promise((resolve) => {
+      const accessToken = sessionStorage.getItem("access_token");
+      $.ajax({
+        method: "GET",
+        contentType: "application/json",
+        url: this.Host_URL() + "/accounts/getAvatar",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        data: {id: JSON.stringify(id)},
+        complete: (data) => {
+          resolve({data});
+        },
+        error: (xhr) => {
+          this.setHttpErrorState(xhr);
+          resolve(null);
+        },
+      });
+    });
+  }
   static async Login(loginInfo) {
     this.initHttpState(); // Initialize error state tracking if needed
     return new Promise((resolve) => {
@@ -108,6 +127,7 @@ class Accounts_API {
         // Handle case where user is not found in sessionStorage
         sessionStorage.removeItem("access_token");
         sessionStorage.removeItem("user");
+        location.reload();
         resolve(null);
       }
     });

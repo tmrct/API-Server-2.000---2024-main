@@ -18,6 +18,7 @@ let showKeywords = false;
 let keywordsOnchangeTimger = null;
 
 Init_UI();
+
 async function Init_UI() {
   postsPanel = new PageManager(
     "postsScrollPanel",
@@ -48,6 +49,15 @@ async function Init_UI() {
   installKeywordsOnkeyupEvent();
   await showPosts();
   start_Periodic_Refresh();
+    if(getLoggedUser()){
+        initTimeout(3, Accounts_API.logout.bind(Accounts_API));
+
+        // Reset the countdown whenever the user interacts with the page
+        $(document).on('mousemove keydown click', function() {
+            timeout();
+        });
+    }
+    console.log("Page is being refreshed or closed.");
 }
 
 /////////////////////////// Search keywords UI //////////////////////////////////////////////////////////
@@ -896,6 +906,13 @@ function renderLoginForm(justCreated = false) {
     } else {
       showError("Une erreur est survenue! ", Accounts_API.currentHttpError);
     }
+
+    initTimeout(3, Accounts_API.logout.bind(Accounts_API));
+
+    // Reset the countdown whenever the user interacts with the page
+    $(document).on('mousemove keydown click', function() {
+        timeout();
+    });
   });
 
   $("#cancel").on("click", async function () {
