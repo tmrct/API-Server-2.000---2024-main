@@ -951,11 +951,16 @@ async function renderUserManagement() {
           `);
     }
   }
-  $(".block").on("click", function () {
+  $(".block").on("click", async function () {
     let userId = this.id;
-    console.log("Block user:", userId);
+    user = await Accounts_API.Index(userId)
+    user = user.data.responseJSON[0]
+    console.log(user);
+    // await Accounts_API.Block(user)
+    // console.log(user);
+    // console.log("Block user:", userId);
   });
-  $(".unblock").on("click", function () {
+  $(".unblock").on("click", async function () {
     let userId = this.id;
     console.log("unblock user:", userId);
   });

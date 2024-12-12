@@ -44,9 +44,9 @@ class Accounts_API {
       $.ajax({
         method: "GET",
         contentType: "application/json",
-        url: this.Host_URL() + "/accounts/index",
+        url: this.Host_URL() + `/accounts/index/`,
         headers: { Authorization: `Bearer ${accessToken}` },
-        data: JSON.stringify(id),
+        data: { id: id },
         complete: (data) => {
           resolve({data});
         },
@@ -175,6 +175,9 @@ class Accounts_API {
         },
       });
     });
+  }
+  static async Block(user){
+
   }
   static async Delete() {
     this.initHttpState();
